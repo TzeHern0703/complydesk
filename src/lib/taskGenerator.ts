@@ -5,6 +5,7 @@ import {
   getNextPeriodLabel,
   getDeadlineForPeriod,
 } from './deadlines'
+import { computeHiddenUntil } from './leadTime'
 
 export function generateTasksForAssignment(
   assignment: ClientTemplateAssignment,
@@ -13,23 +14,42 @@ export function generateTasksForAssignment(
 ): Task[] {
   const now = referenceDate ?? new Date()
   const tasks: Task[] = []
+  const leadTimeDays = assignment.leadTimeDays ?? 0
+
+  // Manual deadline mode: single task with user-set deadline
+  if (assignment.deadlineMode === 'manual') {
+    if (!assignment.manualDeadline) return tasks
+    const deadline = new Date(assignment.manualDeadline + 'T00:00:00')
+    const hiddenUntil = computeHiddenUntil(deadline, leadTimeDays)
+    tasks.push({
+      id: `${assignment.clientId}-${template.id}-${assignment.manualDeadline}`,
+      clientId: assignment.clientId,
+      templateId: template.id,
+      periodLabel: assignment.manualDeadline,
+      deadline,
+      isManualMode: true,
+      hiddenUntil,
+      status: 'pending',
+      createdAt: now,
+    })
+    return tasks
+  }
 
   if (template.category === 'weekly') {
     const weekdays = template.deadlineRule.weekdays ?? []
     if (weekdays.length === 0) return tasks
-    // Generate current week + next week
     for (let weekOffset = 0; weekOffset <= 1; weekOffset++) {
       const sunday = startOfWeek(addWeeks(now, weekOffset), { weekStartsOn: 0 })
       for (const wd of weekdays) {
         const date = addDays(sunday, wd)
         const periodLabel = format(date, 'yyyy-MM-dd')
-        const taskId = `${assignment.clientId}-${template.id}-${periodLabel}`
         tasks.push({
-          id: taskId,
+          id: `${assignment.clientId}-${template.id}-${periodLabel}`,
           clientId: assignment.clientId,
           templateId: template.id,
           periodLabel,
           deadline: date,
+          isManualMode: false,
           status: 'pending',
           createdAt: now,
         })
@@ -71,14 +91,16 @@ export function generateTasksForAssignment(
   const nextLabel = getNextPeriodLabel(template, currentLabel)
 
   for (const label of [currentLabel, nextLabel]) {
-    const taskId = `${assignment.clientId}-${template.id}-${label}`
     const deadline = getDeadlineForPeriod(template, label, now)
+    const hiddenUntil = computeHiddenUntil(deadline, leadTimeDays)
     tasks.push({
-      id: taskId,
+      id: `${assignment.clientId}-${template.id}-${label}`,
       clientId: assignment.clientId,
       templateId: template.id,
       periodLabel: label,
       deadline,
+      isManualMode: false,
+      hiddenUntil,
       status: 'pending',
       createdAt: now,
     })

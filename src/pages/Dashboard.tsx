@@ -13,7 +13,11 @@ export function Dashboard() {
   const activeClients = clients.filter((c) => c.isActive)
   const activeClientIds = new Set(activeClients.map((c) => c.id))
 
-  const activeTasks = tasks.filter((t) => activeClientIds.has(t.clientId))
+  const activeTasks = tasks.filter((t) => {
+    if (!activeClientIds.has(t.clientId)) return false
+    if (t.hiddenUntil && new Date(t.hiddenUntil) > now) return false
+    return true
+  })
 
   const overdue = activeTasks.filter(
     (t) => t.status === 'pending' && isOverdue(t.deadline)

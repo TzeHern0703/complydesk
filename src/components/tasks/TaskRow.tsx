@@ -25,7 +25,10 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
   const [deadlineInput, setDeadlineInput] = useState(
     format(new Date(task.deadline), 'yyyy-MM-dd')
   )
-  const { updateTaskStatus, updateTaskNotes, updateTaskDeadline } = useStore()
+  const { updateTaskStatus, updateTaskNotes, updateTaskDeadline, completeManualTask } = useStore()
+  const [showNextDeadline, setShowNextDeadline] = useState(false)
+  const [nextDeadlineInput, setNextDeadlineInput] = useState('')
+  const [nextLeadTime, setNextLeadTime] = useState(180)
 
   const days = daysUntil(task.deadline)
   const isCompleted = task.status === 'completed'
@@ -45,6 +48,10 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
     : 'default'
 
   async function toggle() {
+    if (!isCompleted && task.isManualMode) {
+      setShowNextDeadline(true)
+      return
+    }
     await updateTaskStatus(task.id, isCompleted ? 'pending' : 'completed')
   }
 
@@ -105,6 +112,9 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
               </span>
             ) : (
               <span className="text-xs text-neutral-400">{formatPeriodLabel(task.periodLabel)}</span>
+            )}
+            {task.isManualMode && (
+              <span className="text-xs text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded">Manual</span>
             )}
           </div>
         </div>
@@ -230,6 +240,66 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
             <Button size="sm" variant="secondary" onClick={handleSaveNotes} disabled={saving}>
               {saving ? 'Saving…' : 'Save notes'}
             </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Manual mode: Set Next Deadline modal */}
+      {showNextDeadline && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowNextDeadline(false)} />
+          <div className="relative bg-white border border-neutral-200 rounded-xl p-6 w-full max-w-sm space-y-4 shadow-lg">
+            <h2 className="text-base font-medium text-neutral-900">Set Next Deadline</h2>
+            <p className="text-sm text-neutral-500">
+              <span className="font-medium text-neutral-900">{template.name}</span> completed!
+              When is the next deadline?
+            </p>
+            <div className="space-y-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-neutral-700">Next deadline</label>
+                <input
+                  type="date"
+                  value={nextDeadlineInput}
+                  onChange={(e) => setNextDeadlineInput(e.target.value)}
+                  className="rounded border border-neutral-200 px-3 py-2 text-sm focus:border-neutral-900 focus:outline-none"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-neutral-700 flex-shrink-0">Show in dashboard:</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={3650}
+                  value={nextLeadTime}
+                  onChange={(e) => setNextLeadTime(Number(e.target.value))}
+                  className="w-20 rounded border border-neutral-200 px-2 py-1 text-sm focus:border-neutral-900 focus:outline-none"
+                />
+                <span className="text-xs text-neutral-400">days before</span>
+              </div>
+            </div>
+            <div className="flex justify-between gap-2 pt-2">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={async () => {
+                  await completeManualTask(task.id)
+                  setShowNextDeadline(false)
+                }}
+              >
+                Skip for now
+              </Button>
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={async () => {
+                  if (!nextDeadlineInput) return
+                  await completeManualTask(task.id, nextDeadlineInput, nextLeadTime)
+                  setShowNextDeadline(false)
+                }}
+              >
+                Save & Done
+              </Button>
+            </div>
           </div>
         </div>
       )}

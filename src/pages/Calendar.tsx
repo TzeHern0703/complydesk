@@ -17,9 +17,12 @@ export function Calendar() {
   const startPad = getDay(monthStart)
   const paddedDays = [...Array(startPad).fill(null), ...days]
 
+  const now = new Date()
   const monthTasks = tasks.filter((t) => {
     const d = new Date(t.deadline)
-    return isSameMonth(d, currentMonth) && t.status !== 'skipped'
+    if (!isSameMonth(d, currentMonth) || t.status === 'skipped') return false
+    if (t.hiddenUntil && new Date(t.hiddenUntil) > now) return false
+    return true
   })
 
   function tasksForDay(day: Date): Task[] {

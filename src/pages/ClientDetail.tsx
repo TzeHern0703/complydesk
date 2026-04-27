@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Edit, Trash2 } from 'lucide-react'
+import { ArrowLeft, Edit, Trash2, CheckCircle } from 'lucide-react'
+import { format } from 'date-fns'
 import { useStore } from '../store/useStore'
 import { TaskSection } from '../components/tasks/TaskSection'
 import { ClientForm } from '../components/clients/ClientForm'
@@ -14,12 +15,18 @@ import type { ClientTemplateAssignment } from '../types'
 export function ClientDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { clients, tasks, templates, deleteClient } = useStore()
+  const { clients, tasks, templates, deleteClient, taskHistory } = useStore()
   const [showEdit, setShowEdit] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
+  const [showAllHistory, setShowAllHistory] = useState(false)
 
   const client = clients.find((c) => c.id === id)
   if (!client || !id) return <div className="p-8 text-neutral-500 text-sm">Client not found.</div>
+
+  const clientHistory = taskHistory
+    .filter((h) => h.clientId === id)
+    .sort((a, b) => new Date(b.completedDate).getTime() - new Date(a.completedDate).getTime())
+  const visibleHistory = showAllHistory ? clientHistory : clientHistory.slice(0, 10)
 
   const clientTasks = tasks.filter((t) => t.clientId === id)
 
@@ -86,6 +93,41 @@ export function ClientDetail() {
       )}
       {postponed.length > 0 && (
         <TaskSection title="Postponed" tasks={postponed} clients={[client]} templates={templates} showClient={false} defaultCollapsed />
+      )}
+
+      {clientHistory.length > 0 && (
+        <div>
+          <p className="text-sm font-medium text-neutral-700 mb-3">History</p>
+          <div className="space-y-2">
+            {visibleHistory.map((entry) => (
+              <div key={entry.id} className="border border-neutral-100 rounded bg-white px-4 py-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <CheckCircle size={14} className="text-neutral-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm font-medium text-neutral-700 truncate">{entry.templateName}</span>
+                  </div>
+                  <span className="text-xs text-neutral-400 flex-shrink-0">
+                    Completed {format(new Date(entry.completedDate), 'd MMM yyyy')}
+                  </span>
+                </div>
+                <div className="ml-5 mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-neutral-400">
+                  <span>Was due: {format(new Date(entry.completedDeadline), 'd MMM yyyy')}</span>
+                  {entry.nextDeadline && (
+                    <span>Next: {format(new Date(entry.nextDeadline + 'T00:00:00'), 'd MMM yyyy')}</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          {clientHistory.length > 10 && (
+            <button
+              onClick={() => setShowAllHistory((v) => !v)}
+              className="mt-2 text-xs text-neutral-400 hover:text-neutral-700 underline underline-offset-2"
+            >
+              {showAllHistory ? 'Show less' : `Show ${clientHistory.length - 10} more`}
+            </button>
+          )}
+        </div>
       )}
 
       <Modal open={showEdit} onClose={() => setShowEdit(false)} title="Edit Client" size="lg">

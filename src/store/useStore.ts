@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import type { Client, Task, TaskTemplate, ClientTemplateAssignment, AppSettings, EmailMessage, EmailFilter, ClientEmailRule, PersonalTask, RecurringWeeklyInstance } from '../types'
+import { nanoid } from 'nanoid'
+import type { Client, Task, TaskTemplate, ClientTemplateAssignment, AppSettings, EmailMessage, EmailFilter, ClientEmailRule, PersonalTask, RecurringWeeklyInstance, TaskHistory } from '../types'
 import * as q from '../db/queries'
 
 interface AppState {
@@ -11,6 +12,7 @@ interface AppState {
   emailMessages: EmailMessage[]
   personalTasks: PersonalTask[]
   recurringInstances: RecurringWeeklyInstance[]
+  taskHistory: TaskHistory[]
   isLocked: boolean
   isLoading: boolean
 
@@ -38,8 +40,14 @@ interface AppState {
     clientId: string,
     templateIds: string[],
     clientNote?: string,
-    anniversaryDates?: Record<string, string>
+    anniversaryDates?: Record<string, string>,
+    deadlineModes?: Record<string, 'auto' | 'manual'>,
+    manualDeadlines?: Record<string, string>,
+    leadTimeDaysMap?: Record<string, number>
   ) => Promise<void>
+
+  completeManualTask: (taskId: string, nextDeadline?: string, nextLeadTimeDays?: number) => Promise<void>
+  loadTaskHistory: () => Promise<void>
 
   updateTaskStatus: (id: string, status: Task['status']) => Promise<void>
   updateTaskNotes: (id: string, notes: string) => Promise<void>
@@ -70,6 +78,7 @@ export const useStore = create<AppState>((set, get) => ({
   emailMessages: [],
   personalTasks: [],
   recurringInstances: [],
+  taskHistory: [],
   isLocked: false,
   isLoading: true,
 
@@ -78,16 +87,18 @@ export const useStore = create<AppState>((set, get) => ({
     await q.initializeDB()
     await q.ensureTasksGenerated()
     await q.ensureRecurringInstancesGenerated()
-    const [clients, templates, tasks, settings, emailMessages, personalTasks, recurringInstances] = await Promise.all([
+    const [clients, templates, tasks, assignments, settings, emailMessages, personalTasks, recurringInstances, taskHistory] = await Promise.all([
       q.getAllClients(),
       q.getAllTemplates(),
       q.getAllTasks(),
+      q.getAllAssignments(),
       q.getSettings(),
       q.getAllEmailMessages(),
       q.getAllPersonalTasks(),
       q.getAllRecurringInstances(),
+      q.getAllTaskHistory(),
     ])
-    set({ clients, templates, tasks, settings, emailMessages, personalTasks, recurringInstances, isLoading: false })
+    set({ clients, templates, tasks, assignments, settings, emailMessages, personalTasks, recurringInstances, taskHistory, isLoading: false })
   },
 
   loadClients: async () => {
@@ -138,16 +149,31 @@ export const useStore = create<AppState>((set, get) => ({
     set({ templates, tasks })
   },
 
-  setClientAssignments: async (clientId, templateIds, clientNote, anniversaryDates) => {
-    await q.setClientAssignments(clientId, templateIds, clientNote, anniversaryDates)
-    const tasks = await q.getAllTasks()
-    set({ tasks })
+  setClientAssignments: async (clientId, templateIds, clientNote, anniversaryDates, deadlineModes, manualDeadlines, leadTimeDaysMap) => {
+    await q.setClientAssignments(clientId, templateIds, clientNote, anniversaryDates, deadlineModes, manualDeadlines, leadTimeDaysMap)
+    const [tasks, assignments] = await Promise.all([q.getAllTasks(), q.getAllAssignments()])
+    set({ tasks, assignments })
   },
 
   updateTaskStatus: async (id, status) => {
     await q.updateTaskStatus(id, status)
-    const tasks = await q.getAllTasks()
-    set({ tasks })
+    if (status === 'completed') {
+      const task = get().tasks.find((t) => t.id === id)
+      const template = task ? get().templates.find((t) => t.id === task.templateId) : undefined
+      if (task && template && !task.isManualMode) {
+        await q.saveTaskHistory({
+          id: nanoid(),
+          clientId: task.clientId,
+          templateId: task.templateId,
+          templateName: template.name,
+          completedDate: new Date(),
+          completedDeadline: new Date(task.deadline),
+          createdAt: new Date(),
+        })
+      }
+    }
+    const [tasks, taskHistory] = await Promise.all([q.getAllTasks(), q.getAllTaskHistory()])
+    set({ tasks, taskHistory })
   },
 
   updateTaskNotes: async (id, notes) => {
@@ -165,6 +191,22 @@ export const useStore = create<AppState>((set, get) => ({
   updateSettings: async (data) => {
     await q.updateSettings(data)
     await get().loadSettings()
+  },
+
+  completeManualTask: async (taskId, nextDeadline, nextLeadTimeDays) => {
+    const task = get().tasks.find((t) => t.id === taskId)
+    const template = task ? get().templates.find((t) => t.id === task.templateId) : undefined
+    if (!task || !template) return
+    await q.completeManualTask(task, template.name, nextDeadline, nextLeadTimeDays)
+    const [tasks, assignments, taskHistory] = await Promise.all([
+      q.getAllTasks(), q.getAllAssignments(), q.getAllTaskHistory(),
+    ])
+    set({ tasks, assignments, taskHistory })
+  },
+
+  loadTaskHistory: async () => {
+    const taskHistory = await q.getAllTaskHistory()
+    set({ taskHistory })
   },
 
   loadPersonalTasks: async () => {

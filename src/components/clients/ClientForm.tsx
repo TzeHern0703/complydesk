@@ -4,6 +4,7 @@ import type { Client, ClientTemplateAssignment } from '../../types'
 import { Input, Textarea } from '../ui/Input'
 import { Button } from '../ui/Button'
 import { useStore } from '../../store/useStore'
+import { getDefaultLeadTime } from '../../lib/leadTime'
 
 interface ClientFormProps {
   client?: Client
@@ -34,6 +35,17 @@ export function ClientForm({ client, assignments, onSave, onCancel, renderFooter
         .filter((a) => a.anniversaryDate)
         .map((a) => [a.templateId, a.anniversaryDate!])
     )
+  )
+  const [deadlineModes, setDeadlineModes] = useState<Record<string, 'auto' | 'manual'>>(
+    Object.fromEntries((assignments ?? []).map((a) => [a.templateId, a.deadlineMode ?? 'auto']))
+  )
+  const [manualDeadlines, setManualDeadlines] = useState<Record<string, string>>(
+    Object.fromEntries(
+      (assignments ?? []).filter((a) => a.manualDeadline).map((a) => [a.templateId, a.manualDeadline!])
+    )
+  )
+  const [leadTimeDaysMap, setLeadTimeDaysMap] = useState<Record<string, number>>(
+    Object.fromEntries((assignments ?? []).map((a) => [a.templateId, a.leadTimeDays ?? 0]))
   )
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -76,7 +88,7 @@ export function ClientForm({ client, assignments, onSave, onCancel, renderFooter
         createdAt: client?.createdAt ?? new Date(),
       }
       await saveClient(saved)
-      await setClientAssignments(id, Array.from(selectedTemplates), clientNote.trim() || undefined, anniversaryDates)
+      await setClientAssignments(id, Array.from(selectedTemplates), clientNote.trim() || undefined, anniversaryDates, deadlineModes, manualDeadlines, leadTimeDaysMap)
       onSave()
     } finally {
       setSaving(false)
@@ -165,12 +177,16 @@ export function ClientForm({ client, assignments, onSave, onCancel, renderFooter
                 <div className="space-y-2">
                   {grouped[cat].map((t) => {
                     const isAnniversary = t.deadlineRule.type === 'anniversary-based'
+                    const isSelected = selectedTemplates.has(t.id)
+                    const showLeadTime = isSelected && t.category !== 'monthly' && t.category !== 'weekly' && t.category !== 'one-time'
+                    const currentMode = deadlineModes[t.id] ?? 'auto'
+                    const currentLeadTime = leadTimeDaysMap[t.id] ?? getDefaultLeadTime(t.category)
                     return (
                       <div key={t.id}>
                         <label className="flex items-start gap-2 text-sm text-neutral-700 cursor-pointer">
                           <input
                             type="checkbox"
-                            checked={selectedTemplates.has(t.id)}
+                            checked={isSelected}
                             onChange={() => toggleTemplate(t.id)}
                             className="mt-0.5 accent-neutral-900"
                           />
@@ -179,17 +195,66 @@ export function ClientForm({ client, assignments, onSave, onCancel, renderFooter
                             {t.nameZh && <span className="ml-1 text-xs text-neutral-400">{t.nameZh}</span>}
                           </div>
                         </label>
-                        {/* Anniversary date override */}
-                        {isAnniversary && selectedTemplates.has(t.id) && (
-                          <div className="ml-6 mt-1.5">
-                            <Input
-                              label={`Anniversary date for ${t.name}`}
-                              type="date"
-                              value={anniversaryDates[t.id] ?? ''}
-                              onChange={(e) =>
-                                setAnniversaryDates((prev) => ({ ...prev, [t.id]: e.target.value }))
-                              }
-                            />
+
+                        {isSelected && (
+                          <div className="ml-6 mt-2 space-y-2">
+                            {/* Anniversary date */}
+                            {isAnniversary && (
+                              <Input
+                                label={`Anniversary date for ${t.name}`}
+                                type="date"
+                                value={anniversaryDates[t.id] ?? ''}
+                                onChange={(e) =>
+                                  setAnniversaryDates((prev) => ({ ...prev, [t.id]: e.target.value }))
+                                }
+                              />
+                            )}
+
+                            {/* Deadline mode */}
+                            {showLeadTime && (
+                              <div className="space-y-2">
+                                <div className="flex gap-4">
+                                  {(['auto', 'manual'] as const).map((mode) => (
+                                    <label key={mode} className="flex items-center gap-1.5 text-xs text-neutral-700 cursor-pointer">
+                                      <input
+                                        type="radio"
+                                        name={`mode-${t.id}`}
+                                        checked={currentMode === mode}
+                                        onChange={() => setDeadlineModes((prev) => ({ ...prev, [t.id]: mode }))}
+                                        className="accent-neutral-900"
+                                      />
+                                      {mode === 'auto' ? 'Auto (from template)' : 'Manual deadline'}
+                                    </label>
+                                  ))}
+                                </div>
+
+                                {currentMode === 'manual' && (
+                                  <Input
+                                    label="Next deadline"
+                                    type="date"
+                                    value={manualDeadlines[t.id] ?? ''}
+                                    onChange={(e) =>
+                                      setManualDeadlines((prev) => ({ ...prev, [t.id]: e.target.value }))
+                                    }
+                                  />
+                                )}
+
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-neutral-500">Show in dashboard:</span>
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    max={3650}
+                                    value={currentLeadTime}
+                                    onChange={(e) =>
+                                      setLeadTimeDaysMap((prev) => ({ ...prev, [t.id]: Number(e.target.value) }))
+                                    }
+                                    className="w-20 rounded border border-neutral-200 px-2 py-1 text-xs focus:border-neutral-900 focus:outline-none"
+                                  />
+                                  <span className="text-xs text-neutral-400">days before deadline</span>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>

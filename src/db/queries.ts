@@ -1,9 +1,11 @@
 import { addDays } from 'date-fns'
+import { nanoid } from 'nanoid'
 import { db } from './schema'
 import { SYSTEM_TEMPLATES } from './seed'
-import type { Client, Task, TaskTemplate, ClientTemplateAssignment, EmailMessage, EmailFilter, ClientEmailRule, PersonalTask, RecurringWeeklyInstance } from '../types'
+import type { Client, Task, TaskTemplate, ClientTemplateAssignment, EmailMessage, EmailFilter, ClientEmailRule, PersonalTask, RecurringWeeklyInstance, TaskHistory } from '../types'
 import { generateTasksForAssignment } from '../lib/taskGenerator'
 import { getWeekStart, weekStartToString } from '../lib/weekUtils'
+import { getDefaultLeadTime, computeHiddenUntil } from '../lib/leadTime'
 
 export async function initializeDB() {
   const settings = await db.settings.get('app')
@@ -59,6 +61,10 @@ export async function deleteTemplate(id: string): Promise<void> {
 }
 
 // Assignments
+export async function getAllAssignments(): Promise<ClientTemplateAssignment[]> {
+  return db.assignments.toArray()
+}
+
 export async function getAssignmentsForClient(clientId: string): Promise<ClientTemplateAssignment[]> {
   return db.assignments.where('clientId').equals(clientId).toArray()
 }
@@ -67,7 +73,10 @@ export async function setClientAssignments(
   clientId: string,
   templateIds: string[],
   clientNote?: string,
-  anniversaryDates?: Record<string, string>
+  anniversaryDates?: Record<string, string>,
+  deadlineModes?: Record<string, 'auto' | 'manual'>,
+  manualDeadlines?: Record<string, string>,
+  leadTimeDaysMap?: Record<string, number>
 ): Promise<void> {
   await db.transaction('rw', [db.assignments, db.tasks, db.taskTemplates], async () => {
     const existing = await db.assignments.where('clientId').equals(clientId).toArray()
@@ -81,29 +90,73 @@ export async function setClientAssignments(
       }
     }
 
-    // Add new assignments and generate tasks
+    // Add new or update existing assignments
     for (const templateId of templateIds) {
       const anniversaryDate = anniversaryDates?.[templateId]
+      const template = await db.taskTemplates.get(templateId)
+      const newMode = deadlineModes?.[templateId] ?? 'auto'
+      const newManualDeadline = newMode === 'manual' ? manualDeadlines?.[templateId] : undefined
+      const newLeadTime = leadTimeDaysMap?.[templateId] ?? getDefaultLeadTime(template?.category ?? 'yearly')
+
       if (!existingIds.has(templateId)) {
-        const id = `${clientId}-${templateId}`
         const assignment: ClientTemplateAssignment = {
-          id,
+          id: `${clientId}-${templateId}`,
           clientId,
           templateId,
           clientNote,
           anniversaryDate,
+          deadlineMode: newMode,
+          manualDeadline: newManualDeadline,
+          leadTimeDays: newLeadTime,
           createdAt: new Date(),
         }
         await db.assignments.put(assignment)
-        const template = await db.taskTemplates.get(templateId)
         if (template) {
           const tasks = generateTasksForAssignment(assignment, template)
           await db.tasks.bulkPut(tasks)
         }
       } else {
-        // Update note/anniversary on existing
         const a = existing.find((e) => e.templateId === templateId)!
-        await db.assignments.update(a.id, { clientNote, anniversaryDate })
+        const oldMode = a.deadlineMode ?? 'auto'
+        const oldManualDeadline = a.manualDeadline
+        const oldLeadTime = a.leadTimeDays ?? 0
+
+        const modeChanged = oldMode !== newMode
+        const deadlineChanged = oldManualDeadline !== newManualDeadline
+        const leadTimeChanged = oldLeadTime !== newLeadTime
+
+        await db.assignments.update(a.id, {
+          clientNote,
+          anniversaryDate,
+          deadlineMode: newMode,
+          manualDeadline: newManualDeadline,
+          leadTimeDays: newLeadTime,
+        })
+
+        if ((modeChanged || deadlineChanged) && template) {
+          // Delete pending tasks and regenerate with new settings
+          const pending = await db.tasks
+            .where('templateId').equals(templateId)
+            .filter((t) => t.clientId === clientId && t.status === 'pending')
+            .toArray()
+          for (const t of pending) await db.tasks.delete(t.id)
+
+          const updatedAssignment: ClientTemplateAssignment = {
+            ...a, deadlineMode: newMode, manualDeadline: newManualDeadline, leadTimeDays: newLeadTime,
+          }
+          const newTasks = generateTasksForAssignment(updatedAssignment, template)
+          await db.tasks.bulkPut(newTasks)
+        } else if (leadTimeChanged) {
+          // Just update hiddenUntil on pending tasks
+          const pending = await db.tasks
+            .where('templateId').equals(templateId)
+            .filter((t) => t.clientId === clientId && t.status === 'pending')
+            .toArray()
+          for (const t of pending) {
+            const hiddenUntil = computeHiddenUntil(new Date(t.deadline), newLeadTime)
+            await db.tasks.update(t.id, { hiddenUntil })
+          }
+        }
       }
     }
   })
@@ -190,6 +243,62 @@ export async function updateEmailProcessed(id: string, isProcessed: boolean): Pr
 
 export async function updateEmailClient(id: string, clientId: string | undefined): Promise<void> {
   await db.emailMessages.update(id, { clientId })
+}
+
+// Task History
+export async function getAllTaskHistory(clientId?: string): Promise<TaskHistory[]> {
+  const all = clientId
+    ? await db.taskHistory.where('clientId').equals(clientId).toArray()
+    : await db.taskHistory.toArray()
+  return all.sort((a, b) => new Date(b.completedDate).getTime() - new Date(a.completedDate).getTime())
+}
+
+export async function saveTaskHistory(entry: TaskHistory): Promise<void> {
+  await db.taskHistory.put(entry)
+}
+
+export async function completeManualTask(
+  task: Task,
+  templateName: string,
+  nextDeadline?: string,
+  nextLeadTimeDays?: number
+): Promise<void> {
+  await db.transaction('rw', [db.tasks, db.assignments, db.taskHistory], async () => {
+    // Mark complete
+    await db.tasks.update(task.id, { status: 'completed', completedAt: new Date() })
+
+    // Record history
+    await db.taskHistory.put({
+      id: nanoid(),
+      clientId: task.clientId,
+      templateId: task.templateId,
+      templateName,
+      completedDate: new Date(),
+      completedDeadline: new Date(task.deadline),
+      nextDeadline,
+      createdAt: new Date(),
+    })
+
+    if (nextDeadline) {
+      const leadTime = nextLeadTimeDays ?? 180
+      const assignmentId = `${task.clientId}-${task.templateId}`
+      await db.assignments.update(assignmentId, { manualDeadline: nextDeadline, leadTimeDays: leadTime })
+
+      const deadline = new Date(nextDeadline + 'T00:00:00')
+      const hiddenUntil = computeHiddenUntil(deadline, leadTime)
+      await db.tasks.put({
+        id: `${task.clientId}-${task.templateId}-${nextDeadline}`,
+        clientId: task.clientId,
+        templateId: task.templateId,
+        periodLabel: nextDeadline,
+        deadline,
+        isManualMode: true,
+        hiddenUntil,
+        status: 'pending',
+        createdAt: new Date(),
+      })
+    }
+  })
 }
 
 // Personal Tasks

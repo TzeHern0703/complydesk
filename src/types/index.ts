@@ -47,6 +47,20 @@ export interface Task {
   status: TaskStatus
   completedAt?: Date
   notes?: string
+  isManualMode?: boolean
+  hiddenUntil?: Date // deadline - leadTimeDays; hidden from dashboard before this date
+  createdAt: Date
+}
+
+export interface TaskHistory {
+  id: string
+  clientId: string
+  templateId: string
+  templateName: string
+  completedDate: Date
+  completedDeadline: Date
+  nextDeadline?: string // ISO date, for manual mode only
+  notes?: string
   createdAt: Date
 }
 
@@ -57,6 +71,9 @@ export interface ClientTemplateAssignment {
   clientNote?: string
   anniversaryDate?: string // ISO date for anniversary-based tasks
   deadlineOverrideDay?: number // Override the day-of-month for this client
+  deadlineMode: 'auto' | 'manual'
+  manualDeadline?: string // ISO date, required when deadlineMode='manual'
+  leadTimeDays: number   // days before deadline to show on dashboard (0 = always visible)
   createdAt: Date
 }
 
