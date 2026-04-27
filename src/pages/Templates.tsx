@@ -50,7 +50,12 @@ export function Templates() {
           </h2>
           <div className="space-y-2">
             {system.map((t) => (
-              <TemplateRow key={t.id} template={t} readonly />
+              <TemplateRow
+                key={t.id}
+                template={t}
+                onEdit={() => { setEditTemplate(t); setShowForm(true) }}
+                onDelete={() => setDeleteId(t.id)}
+              />
             ))}
           </div>
         </section>
@@ -251,7 +256,7 @@ function TemplateForm({
         url: websiteUrl.trim(),
       },
       description: description.trim(),
-      isSystemDefault: false,
+      isSystemDefault: template?.isSystemDefault ?? false,
     }
     onSave(t)
   }
