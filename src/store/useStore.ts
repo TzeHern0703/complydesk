@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Client, Task, TaskTemplate, ClientTemplateAssignment, AppSettings, EmailMessage, EmailFilter, ClientEmailRule } from '../types'
+import type { Client, Task, TaskTemplate, ClientTemplateAssignment, AppSettings, EmailMessage, EmailFilter, ClientEmailRule, PersonalTask, RecurringWeeklyInstance } from '../types'
 import * as q from '../db/queries'
 
 interface AppState {
@@ -9,6 +9,8 @@ interface AppState {
   assignments: ClientTemplateAssignment[]
   settings: AppSettings | undefined
   emailMessages: EmailMessage[]
+  personalTasks: PersonalTask[]
+  recurringInstances: RecurringWeeklyInstance[]
   isLocked: boolean
   isLoading: boolean
 
@@ -24,6 +26,13 @@ interface AppState {
 
   saveTemplate: (template: TaskTemplate) => Promise<void>
   deleteTemplate: (id: string) => Promise<void>
+
+  loadPersonalTasks: () => Promise<void>
+  savePersonalTask: (task: PersonalTask) => Promise<void>
+  deletePersonalTask: (id: string) => Promise<void>
+  updatePersonalTaskStatus: (id: string, status: 'pending' | 'completed') => Promise<void>
+  updateRecurringInstanceStatus: (id: string, status: 'pending' | 'completed') => Promise<void>
+  ensureRecurringInstancesForWeek: (weekStartStr: string) => Promise<void>
 
   setClientAssignments: (
     clientId: string,
@@ -59,6 +68,8 @@ export const useStore = create<AppState>((set, get) => ({
   assignments: [],
   settings: undefined,
   emailMessages: [],
+  personalTasks: [],
+  recurringInstances: [],
   isLocked: false,
   isLoading: true,
 
@@ -66,14 +77,17 @@ export const useStore = create<AppState>((set, get) => ({
     set({ isLoading: true })
     await q.initializeDB()
     await q.ensureTasksGenerated()
-    const [clients, templates, tasks, settings, emailMessages] = await Promise.all([
+    await q.ensureRecurringInstancesGenerated()
+    const [clients, templates, tasks, settings, emailMessages, personalTasks, recurringInstances] = await Promise.all([
       q.getAllClients(),
       q.getAllTemplates(),
       q.getAllTasks(),
       q.getSettings(),
       q.getAllEmailMessages(),
+      q.getAllPersonalTasks(),
+      q.getAllRecurringInstances(),
     ])
-    set({ clients, templates, tasks, settings, emailMessages, isLoading: false })
+    set({ clients, templates, tasks, settings, emailMessages, personalTasks, recurringInstances, isLoading: false })
   },
 
   loadClients: async () => {
@@ -151,6 +165,46 @@ export const useStore = create<AppState>((set, get) => ({
   updateSettings: async (data) => {
     await q.updateSettings(data)
     await get().loadSettings()
+  },
+
+  loadPersonalTasks: async () => {
+    const [personalTasks, recurringInstances] = await Promise.all([
+      q.getAllPersonalTasks(),
+      q.getAllRecurringInstances(),
+    ])
+    set({ personalTasks, recurringInstances })
+  },
+
+  savePersonalTask: async (task) => {
+    await q.savePersonalTask(task)
+    if (task.type === 'recurring-weekly') {
+      await q.deletePendingInstancesForTask(task.id)
+      await q.ensureRecurringInstancesGenerated()
+    }
+    await get().loadPersonalTasks()
+  },
+
+  deletePersonalTask: async (id) => {
+    await q.deletePersonalTask(id)
+    await get().loadPersonalTasks()
+  },
+
+  updatePersonalTaskStatus: async (id, status) => {
+    await q.updatePersonalTaskStatus(id, status)
+    const personalTasks = await q.getAllPersonalTasks()
+    set({ personalTasks })
+  },
+
+  updateRecurringInstanceStatus: async (id, status) => {
+    await q.updateRecurringInstanceStatus(id, status)
+    const recurringInstances = await q.getAllRecurringInstances()
+    set({ recurringInstances })
+  },
+
+  ensureRecurringInstancesForWeek: async (weekStartStr) => {
+    await q.ensureRecurringInstancesForWeek(weekStartStr)
+    const recurringInstances = await q.getAllRecurringInstances()
+    set({ recurringInstances })
   },
 
   setLocked: (locked) => set({ isLocked: locked }),

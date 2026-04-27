@@ -9,6 +9,7 @@ import { Calendar } from './pages/Calendar'
 import { Settings } from './pages/Settings'
 import { Inbox } from './pages/Inbox'
 import { LockScreen } from './pages/LockScreen'
+import { MyWeek } from './pages/MyWeek'
 import { useStore } from './store/useStore'
 
 export default function App() {
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="/inbox" element={<Inbox />} />
           <Route path="/templates" element={<Templates />} />
           <Route path="/calendar" element={<Calendar />} />
+          <Route path="/my-week" element={<MyWeek />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </Layout>

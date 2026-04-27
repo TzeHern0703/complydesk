@@ -1,9 +1,11 @@
-import { format } from 'date-fns'
+import { format, isBefore } from 'date-fns'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { TaskSection } from '../components/tasks/TaskSection'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { isOverdue, isDueThisWeek, daysUntil } from '../lib/dateUtils'
+import { getWeekStart, weekStartToString, formatTime12h } from '../lib/weekUtils'
+import type { PersonalTask } from '../types'
 
 export function Dashboard() {
   const { tasks, clients, templates, settings } = useStore()
@@ -108,6 +110,135 @@ export function Dashboard() {
           templates={templates}
           defaultCollapsed
         />
+      )}
+
+      <MyWeekWidget />
+    </div>
+  )
+}
+
+function MyWeekWidget() {
+  const navigate = useNavigate()
+  const { personalTasks, recurringInstances } = useStore()
+  const now = new Date()
+  const todayWd = now.getDay()
+  const tomorrowWd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getDay()
+  const currentWeekStart = weekStartToString(getWeekStart(now))
+
+  const todayInstances = recurringInstances.filter(
+    (i) => i.weekStart === currentWeekStart && i.weekday === todayWd && i.status === 'pending'
+  )
+  const todayOnce = personalTasks.filter(
+    (t) => t.type === 'one-time-weekly' && t.weekStart === currentWeekStart && t.scheduledWeekday === todayWd && t.status === 'pending'
+  )
+  const tomorrowInstances = recurringInstances.filter(
+    (i) => i.weekStart === currentWeekStart && i.weekday === tomorrowWd && i.status === 'pending'
+  )
+  const tomorrowOnce = personalTasks.filter(
+    (t) => t.type === 'one-time-weekly' && t.weekStart === currentWeekStart && t.scheduledWeekday === tomorrowWd && t.status === 'pending'
+  )
+  const unscheduled = personalTasks.filter(
+    (t) => t.type === 'one-time-weekly' && t.weekStart === currentWeekStart && t.scheduledWeekday === undefined && t.status === 'pending'
+  )
+  const overdueTodos = personalTasks.filter(
+    (t) => t.type === 'todo' && t.deadline && t.status === 'pending' && isBefore(new Date(t.deadline + 'T23:59:59'), now)
+  )
+
+  const allEmpty =
+    todayInstances.length === 0 &&
+    todayOnce.length === 0 &&
+    tomorrowInstances.length === 0 &&
+    tomorrowOnce.length === 0 &&
+    unscheduled.length === 0 &&
+    overdueTodos.length === 0
+
+  const recurringMap = new Map<string, PersonalTask>(
+    personalTasks.filter((t) => t.type === 'recurring-weekly').map((t) => [t.id, t])
+  )
+
+  function renderItem(label: string, time?: string) {
+    return (
+      <div key={label} className="flex items-center gap-2 text-sm text-neutral-700 py-0.5">
+        <span className="w-3.5 h-3.5 rounded border border-neutral-300 flex-shrink-0" />
+        <span>{label}</span>
+        {time && <span className="text-xs text-neutral-400">{formatTime12h(time)}</span>}
+      </div>
+    )
+  }
+
+  return (
+    <div className="border border-neutral-200 rounded p-4 space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-neutral-900">My Week</h2>
+        <button
+          onClick={() => navigate('/my-week')}
+          className="text-xs text-neutral-400 hover:text-neutral-900 underline underline-offset-2"
+        >
+          Open My Week →
+        </button>
+      </div>
+
+      {allEmpty ? (
+        <p className="text-sm text-neutral-400">Nothing scheduled for today.</p>
+      ) : (
+        <div className="space-y-3">
+          {(todayInstances.length > 0 || todayOnce.length > 0) && (
+            <div>
+              <p className="text-xs font-medium text-neutral-500 mb-1">
+                Today ({todayInstances.length + todayOnce.length} pending)
+              </p>
+              {todayInstances.map((i) => {
+                const rt = recurringMap.get(i.recurringTaskId)
+                return rt ? renderItem(rt.title, rt.recurringTime) : null
+              })}
+              {todayOnce.map((t) => renderItem(t.title, t.scheduledTime))}
+            </div>
+          )}
+
+          {(tomorrowInstances.length > 0 || tomorrowOnce.length > 0) && (
+            <div>
+              <p className="text-xs font-medium text-neutral-500 mb-1">
+                Tomorrow ({tomorrowInstances.length + tomorrowOnce.length})
+              </p>
+              {tomorrowInstances.map((i) => {
+                const rt = recurringMap.get(i.recurringTaskId)
+                return rt ? renderItem(rt.title, rt.recurringTime) : null
+              })}
+              {tomorrowOnce.map((t) => renderItem(t.title, t.scheduledTime))}
+            </div>
+          )}
+
+          {unscheduled.length > 0 && (
+            <div>
+              <p className="text-xs font-medium text-neutral-500 mb-1">
+                Unscheduled this week ({unscheduled.length})
+              </p>
+              {unscheduled.map((t) => renderItem(t.title))}
+            </div>
+          )}
+
+          {overdueTodos.length > 0 && (
+            <div>
+              <p className="text-xs font-medium text-red-500 mb-1">
+                Overdue to-dos ({overdueTodos.length})
+              </p>
+              {overdueTodos.slice(0, 3).map((t) => (
+                <div key={t.id} className="flex items-center gap-2 text-sm text-neutral-700 py-0.5">
+                  <span className="w-3.5 h-3.5 rounded border border-red-300 flex-shrink-0" />
+                  <span>{t.title}</span>
+                  {t.deadline && (
+                    <span className="text-xs text-red-400">
+                      due {format(new Date(t.deadline + 'T00:00:00'), 'd MMM')}
+                    </span>
+                  )}
+                </div>
+              ))}
+              {overdueTodos.length > 3 && (
+                <p className="text-xs text-neutral-400 pl-5">+{overdueTodos.length - 3} more</p>
+              )}
+            </div>
+          )}
+        </div>
       )}
     </div>
   )

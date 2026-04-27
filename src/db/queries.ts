@@ -1,7 +1,9 @@
+import { addDays } from 'date-fns'
 import { db } from './schema'
 import { SYSTEM_TEMPLATES } from './seed'
-import type { Client, Task, TaskTemplate, ClientTemplateAssignment, EmailMessage, EmailFilter, ClientEmailRule } from '../types'
+import type { Client, Task, TaskTemplate, ClientTemplateAssignment, EmailMessage, EmailFilter, ClientEmailRule, PersonalTask, RecurringWeeklyInstance } from '../types'
 import { generateTasksForAssignment } from '../lib/taskGenerator'
+import { getWeekStart, weekStartToString } from '../lib/weekUtils'
 
 export async function initializeDB() {
   const settings = await db.settings.get('app')
@@ -188,6 +190,84 @@ export async function updateEmailProcessed(id: string, isProcessed: boolean): Pr
 
 export async function updateEmailClient(id: string, clientId: string | undefined): Promise<void> {
   await db.emailMessages.update(id, { clientId })
+}
+
+// Personal Tasks
+export async function getAllPersonalTasks(): Promise<PersonalTask[]> {
+  return db.personalTasks.toArray()
+}
+
+export async function savePersonalTask(task: PersonalTask): Promise<void> {
+  await db.personalTasks.put(task)
+}
+
+export async function deletePersonalTask(id: string): Promise<void> {
+  await db.transaction('rw', [db.personalTasks, db.recurringInstances], async () => {
+    await db.recurringInstances.where('recurringTaskId').equals(id).delete()
+    await db.personalTasks.delete(id)
+  })
+}
+
+export async function updatePersonalTaskStatus(id: string, status: 'pending' | 'completed'): Promise<void> {
+  const update: Partial<PersonalTask> = { status }
+  if (status === 'completed') update.completedAt = new Date()
+  else update.completedAt = undefined
+  await db.personalTasks.update(id, update)
+}
+
+// Recurring Instances
+export async function getAllRecurringInstances(): Promise<RecurringWeeklyInstance[]> {
+  return db.recurringInstances.toArray()
+}
+
+export async function updateRecurringInstanceStatus(id: string, status: 'pending' | 'completed'): Promise<void> {
+  const update: Partial<RecurringWeeklyInstance> = { status }
+  if (status === 'completed') update.completedAt = new Date()
+  else update.completedAt = undefined
+  await db.recurringInstances.update(id, update)
+}
+
+export async function deletePendingInstancesForTask(taskId: string): Promise<void> {
+  const instances = await db.recurringInstances.where('recurringTaskId').equals(taskId).toArray()
+  const pendingIds = instances.filter((i) => i.status === 'pending').map((i) => i.id)
+  await db.recurringInstances.bulkDelete(pendingIds)
+}
+
+export async function ensureRecurringInstancesGenerated(): Promise<void> {
+  const now = new Date()
+  const weeks = [
+    weekStartToString(getWeekStart(now)),
+    weekStartToString(getWeekStart(addDays(now, 7))),
+  ]
+  await ensureRecurringInstancesForWeeks(weeks)
+}
+
+export async function ensureRecurringInstancesForWeek(weekStartStr: string): Promise<void> {
+  await ensureRecurringInstancesForWeeks([weekStartStr])
+}
+
+async function ensureRecurringInstancesForWeeks(weekStarts: string[]): Promise<void> {
+  const recurringTasks = (await db.personalTasks.toArray()).filter(
+    (t) => t.type === 'recurring-weekly'
+  )
+  for (const task of recurringTasks) {
+    const weekdays = task.recurringWeekdays ?? []
+    for (const ws of weekStarts) {
+      for (const wd of weekdays) {
+        const id = `${task.id}-${ws}-${wd}`
+        const existing = await db.recurringInstances.get(id)
+        if (!existing) {
+          await db.recurringInstances.put({
+            id,
+            recurringTaskId: task.id,
+            weekStart: ws,
+            weekday: wd,
+            status: 'pending',
+          })
+        }
+      }
+    }
+  }
 }
 
 // Export / Import

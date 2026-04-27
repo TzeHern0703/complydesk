@@ -1,8 +1,9 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Users, CalendarDays, Library, Settings, X, Inbox } from 'lucide-react'
+import { LayoutDashboard, Users, CalendarDays, Library, Settings, X, Inbox, ListTodo } from 'lucide-react'
 
 const nav = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/my-week', label: 'My Week', icon: ListTodo },
   { to: '/clients', label: 'Clients', icon: Users },
   { to: '/inbox', label: 'Inbox', icon: Inbox },
   { to: '/calendar', label: 'Calendar', icon: CalendarDays },

@@ -112,3 +112,32 @@ export interface ClientEmailRule {
   emailDomain?: string
   emailAddress?: string
 }
+
+export interface PersonalTask {
+  id: string
+  type: 'one-time-weekly' | 'recurring-weekly' | 'todo'
+  title: string
+  notes?: string
+  // one-time-weekly
+  weekStart?: string       // ISO date "yyyy-MM-dd" (Monday of the week)
+  scheduledWeekday?: number // 0=Sun,1=Mon,...,6=Sat; undefined = Unscheduled
+  scheduledTime?: string   // "HH:mm"
+  // recurring-weekly
+  recurringWeekdays?: number[]
+  recurringTime?: string   // "HH:mm"
+  // todo
+  deadline?: string        // ISO date string
+  // common
+  status: 'pending' | 'completed'
+  completedAt?: Date
+  createdAt: Date
+}
+
+export interface RecurringWeeklyInstance {
+  id: string
+  recurringTaskId: string
+  weekStart: string  // ISO date (Monday)
+  weekday: number    // 0=Sun,1=Mon,...,6=Sat
+  status: 'pending' | 'completed'
+  completedAt?: Date
+}
