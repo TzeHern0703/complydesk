@@ -49,7 +49,11 @@ export async function saveTemplate(template: TaskTemplate): Promise<void> {
 }
 
 export async function deleteTemplate(id: string): Promise<void> {
-  await db.taskTemplates.delete(id)
+  await db.transaction('rw', [db.taskTemplates, db.assignments, db.tasks], async () => {
+    await db.tasks.where('templateId').equals(id).delete()
+    await db.assignments.where('templateId').equals(id).delete()
+    await db.taskTemplates.delete(id)
+  })
 }
 
 // Assignments

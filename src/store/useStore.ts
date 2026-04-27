@@ -120,7 +120,8 @@ export const useStore = create<AppState>((set, get) => ({
 
   deleteTemplate: async (id) => {
     await q.deleteTemplate(id)
-    await get().loadTemplates()
+    const [templates, tasks] = await Promise.all([q.getAllTemplates(), q.getAllTasks()])
+    set({ templates, tasks })
   },
 
   setClientAssignments: async (clientId, templateIds, clientNote, anniversaryDates) => {
