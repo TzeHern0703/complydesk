@@ -39,6 +39,7 @@ export function ClientForm({ client, assignments, onSave, onCancel, renderFooter
   const [error, setError] = useState('')
 
   const grouped = {
+    weekly: templates.filter((t) => t.category === 'weekly'),
     monthly: templates.filter((t) => t.category === 'monthly'),
     'bi-monthly': templates.filter((t) => t.category === 'bi-monthly'),
     'half-yearly': templates.filter((t) => t.category === 'half-yearly'),
@@ -83,6 +84,7 @@ export function ClientForm({ client, assignments, onSave, onCancel, renderFooter
   }
 
   const categoryLabels: Record<string, string> = {
+    weekly: 'Weekly',
     monthly: 'Monthly',
     'bi-monthly': 'Bi-Monthly',
     'half-yearly': 'Half-Yearly',

@@ -1,3 +1,4 @@
+import { addWeeks, startOfWeek, addDays, format } from 'date-fns'
 import type { ClientTemplateAssignment, Task, TaskTemplate } from '../types'
 import {
   getCurrentPeriodLabel,
@@ -12,6 +13,30 @@ export function generateTasksForAssignment(
 ): Task[] {
   const now = referenceDate ?? new Date()
   const tasks: Task[] = []
+
+  if (template.category === 'weekly') {
+    const weekdays = template.deadlineRule.weekdays ?? []
+    if (weekdays.length === 0) return tasks
+    // Generate current week + next week
+    for (let weekOffset = 0; weekOffset <= 1; weekOffset++) {
+      const sunday = startOfWeek(addWeeks(now, weekOffset), { weekStartsOn: 0 })
+      for (const wd of weekdays) {
+        const date = addDays(sunday, wd)
+        const periodLabel = format(date, 'yyyy-MM-dd')
+        const taskId = `${assignment.clientId}-${template.id}-${periodLabel}`
+        tasks.push({
+          id: taskId,
+          clientId: assignment.clientId,
+          templateId: template.id,
+          periodLabel,
+          deadline: date,
+          status: 'pending',
+          createdAt: now,
+        })
+      }
+    }
+    return tasks
+  }
 
   if (template.category === 'yearly' && template.deadlineRule.type === 'anniversary-based') {
     // Anniversary-based: generate current year task

@@ -45,5 +45,10 @@ export function formatPeriodLabel(label: string): string {
     const [year, half] = label.split('-')
     return `${half} ${year}`
   }
+  // "2026-04-27" (weekly task date) -> "Mon 27 Apr 2026"
+  if (/^\d{4}-\d{2}-\d{2}$/.test(label)) {
+    const [y, m, d] = label.split('-').map(Number)
+    return format(new Date(y, m - 1, d), 'EEE d MMM yyyy')
+  }
   return label
 }

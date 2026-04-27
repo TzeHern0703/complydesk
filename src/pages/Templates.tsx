@@ -17,7 +17,10 @@ const categoryLabels: Record<string, string> = {
   quarterly: 'Quarterly',
   yearly: 'Yearly',
   'one-time': 'One-time',
+  weekly: 'Weekly',
 }
+
+const WEEKDAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
@@ -173,6 +176,9 @@ function TemplateForm({
   const [yearlyMonth, setYearlyMonth] = useState(String(template?.deadlineRule.dayOfYear?.month ?? 3))
   const [yearlyDay, setYearlyDay] = useState(String(template?.deadlineRule.dayOfYear?.day ?? 31))
   const [oneTimeDate, setOneTimeDate] = useState(template?.deadlineRule.oneTimeDate ?? '')
+  const [selectedWeekdays, setSelectedWeekdays] = useState<number[]>(
+    template?.deadlineRule.weekdays ?? []
+  )
   const [reminderDays, setReminderDays] = useState<number[]>(
     template?.deadlineRule.reminderDaysBefore ?? [7, 1]
   )
@@ -185,6 +191,12 @@ function TemplateForm({
   function toggleMonth(m: number) {
     setSelectedMonths((prev) =>
       prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m].sort((a, b) => a - b)
+    )
+  }
+
+  function toggleWeekday(d: number) {
+    setSelectedWeekdays((prev) =>
+      prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d].sort((a, b) => a - b)
     )
   }
 
@@ -201,9 +213,15 @@ function TemplateForm({
       setError('Name and website URL are required')
       return
     }
+    if (category === 'weekly' && selectedWeekdays.length === 0) {
+      setError('Select at least one day of the week')
+      return
+    }
 
     let rule: DeadlineRule
-    if (category === 'yearly' && deadlineType === 'anniversary-based') {
+    if (category === 'weekly') {
+      rule = { type: 'weekly', weekdays: selectedWeekdays, reminderDaysBefore: reminderDays }
+    } else if (category === 'yearly' && deadlineType === 'anniversary-based') {
       rule = { type: 'anniversary-based', reminderDaysBefore: reminderDays }
     } else if (category === 'yearly' && deadlineType === 'day-of-year') {
       rule = {
@@ -239,8 +257,9 @@ function TemplateForm({
   }
 
   const showMonthPicker = ['bi-monthly', 'quarterly', 'half-yearly'].includes(category)
-  const showDayOfMonth = category !== 'yearly' && category !== 'one-time'
+  const showDayOfMonth = category !== 'yearly' && category !== 'one-time' && category !== 'weekly'
   const showYearlyOptions = category === 'yearly'
+  const showWeekdayPicker = category === 'weekly'
 
   return (
     <div className="space-y-5">
@@ -264,6 +283,7 @@ function TemplateForm({
             <option value="quarterly">Quarterly</option>
             <option value="half-yearly">Half-Yearly</option>
             <option value="yearly">Yearly</option>
+            <option value="weekly">Weekly</option>
             <option value="one-time">One-time</option>
           </select>
         </div>
@@ -353,6 +373,29 @@ function TemplateForm({
             ))}
           </div>
           <p className="text-xs text-neutral-400 mt-1">Leave blank to apply every period</p>
+        </div>
+      )}
+
+      {showWeekdayPicker && (
+        <div>
+          <p className="text-sm font-medium text-neutral-700 mb-2">Days of week *</p>
+          <div className="flex flex-wrap gap-2">
+            {WEEKDAY_SHORT.map((day, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => toggleWeekday(i)}
+                className={`px-2.5 py-1 rounded text-xs border transition-colors ${
+                  selectedWeekdays.includes(i)
+                    ? 'bg-neutral-900 text-white border-neutral-900'
+                    : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-400'
+                }`}
+              >
+                {day}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-neutral-400 mt-1">Select at least one day</p>
         </div>
       )}
 

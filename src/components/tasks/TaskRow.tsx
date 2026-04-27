@@ -8,6 +8,8 @@ import { useStore } from '../../store/useStore'
 import { Textarea } from '../ui/Input'
 import { format } from 'date-fns'
 
+const WEEKDAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
 interface TaskRowProps {
   task: Task
   client: Client
@@ -97,7 +99,13 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
             >
               {template.name}
             </span>
-            <span className="text-xs text-neutral-400">{formatPeriodLabel(task.periodLabel)}</span>
+            {template.category === 'weekly' && template.deadlineRule.weekdays?.length ? (
+              <span className="text-xs text-neutral-400">
+                Weekly – {template.deadlineRule.weekdays.map((d) => WEEKDAY_SHORT[d]).join(', ')}
+              </span>
+            ) : (
+              <span className="text-xs text-neutral-400">{formatPeriodLabel(task.periodLabel)}</span>
+            )}
           </div>
         </div>
 
