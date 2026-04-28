@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Download, Upload, Lock, Unlock, Plus, X, Wifi } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Download, Upload, Lock, Unlock, Plus, X, Wifi, Bell } from 'lucide-react'
 import { nanoid } from 'nanoid'
 import { useStore } from '../store/useStore'
 import { Button } from '../components/ui/Button'
@@ -7,6 +7,12 @@ import { Input } from '../components/ui/Input'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import type { EmailFilter, ClientEmailRule } from '../types'
 import { requestGmailToken } from '../lib/gmail'
+import {
+  supportsNotifications,
+  getNotificationPermission,
+  requestNotificationPermission,
+  sendBrowserNotification,
+} from '../lib/notificationUtils'
 import * as q from '../db/queries'
 
 async function sha256(text: string): Promise<string> {
@@ -40,6 +46,21 @@ export function Settings() {
   ])
   const [newFilterValue, setNewFilterValue] = useState('')
   const [newFilterType, setNewFilterType] = useState<EmailFilter['type']>('keyword')
+
+  // Notification settings
+  const [notifPermission, setNotifPermission] = useState<NotificationPermission>(getNotificationPermission())
+  const [notifDailyTime, setNotifDailyTime] = useState(settings?.notificationDailyTime ?? '09:00')
+  const [notifAlertOverdue, setNotifAlertOverdue] = useState(settings?.notificationAlertOverdue ?? false)
+  const [notifAlertDueToday, setNotifAlertDueToday] = useState(settings?.notificationAlertDueToday ?? false)
+  const [notifSaveMsg, setNotifSaveMsg] = useState('')
+
+  // Install as app (PWA)
+  const [installPrompt, setInstallPrompt] = useState<any>(null)
+  useEffect(() => {
+    const handler = (e: any) => { e.preventDefault(); setInstallPrompt(e) }
+    window.addEventListener('beforeinstallprompt', handler)
+    return () => window.removeEventListener('beforeinstallprompt', handler)
+  }, [])
 
   // Client email rules
   const [clientRules, setClientRules] = useState<ClientEmailRule[]>(settings?.clientEmailRules ?? [])
@@ -173,6 +194,36 @@ export function Settings() {
       },
     ])
     setNewRuleEmail('')
+  }
+
+  async function handleEnableNotifications() {
+    const permission = await requestNotificationPermission()
+    setNotifPermission(permission)
+    if (permission === 'granted') {
+      await updateSettings({ notificationEnabled: true })
+      setNotifSaveMsg('Notifications enabled.')
+    } else {
+      setNotifSaveMsg('Permission was not granted. Update your browser settings to allow notifications.')
+    }
+  }
+
+  async function handleDisableNotifications() {
+    await updateSettings({ notificationEnabled: false })
+    setNotifSaveMsg('Notifications disabled.')
+  }
+
+  async function handleSaveNotifSettings() {
+    await updateSettings({
+      notificationDailyTime: notifDailyTime,
+      notificationAlertOverdue: notifAlertOverdue,
+      notificationAlertDueToday: notifAlertDueToday,
+    })
+    setNotifSaveMsg('Settings saved.')
+    setTimeout(() => setNotifSaveMsg(''), 2000)
+  }
+
+  function handleTestNotification() {
+    sendBrowserNotification('ComplyDesk — Test', 'Notifications are working correctly.')
   }
 
   const filterTypeLabels: Record<EmailFilter['type'], string> = {
@@ -372,6 +423,111 @@ export function Settings() {
         <Button variant="primary" onClick={handleSaveClientRules}>
           Save rules
         </Button>
+      </section>
+
+      {/* Notifications */}
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium text-neutral-900 border-b border-neutral-100 pb-2">Notifications</h2>
+
+        {!supportsNotifications() ? (
+          <p className="text-sm text-neutral-500">
+            Browser notifications are not supported in this browser. Install ComplyDesk as an app on a supported browser to enable notifications.
+          </p>
+        ) : notifPermission === 'denied' ? (
+          <div className="space-y-2">
+            <p className="text-sm text-neutral-500">
+              Browser notifications are blocked. Update your browser settings to allow notifications for this site.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-neutral-700 font-medium">Browser notifications</p>
+                <p className="text-xs text-neutral-400">Get alerts when tasks are due — even in another tab</p>
+              </div>
+              {settings?.notificationEnabled ? (
+                <Button variant="ghost" size="sm" onClick={handleDisableNotifications}>
+                  Disable
+                </Button>
+              ) : (
+                <Button variant="secondary" size="sm" onClick={handleEnableNotifications}>
+                  <Bell size={13} />
+                  Enable
+                </Button>
+              )}
+            </div>
+
+            {settings?.notificationEnabled && (
+              <>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <label className="text-sm text-neutral-700 w-40">Daily reminder time</label>
+                    <input
+                      type="time"
+                      value={notifDailyTime}
+                      onChange={(e) => setNotifDailyTime(e.target.value)}
+                      className="rounded border border-neutral-200 px-3 py-1.5 text-sm focus:border-neutral-900 focus:outline-none"
+                    />
+                  </div>
+                  <label className="flex items-center gap-2 text-sm text-neutral-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={notifAlertOverdue}
+                      onChange={(e) => setNotifAlertOverdue(e.target.checked)}
+                      className="accent-neutral-900"
+                    />
+                    Alert when a task becomes overdue
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-neutral-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={notifAlertDueToday}
+                      onChange={(e) => setNotifAlertDueToday(e.target.checked)}
+                      className="accent-neutral-900"
+                    />
+                    Alert when a task is due today
+                  </label>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="primary" size="sm" onClick={handleSaveNotifSettings}>
+                    Save settings
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={handleTestNotification}>
+                    Send test notification
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {notifSaveMsg && <p className="text-xs text-neutral-600">{notifSaveMsg}</p>}
+          </div>
+        )}
+
+        {installPrompt && (
+          <div className="border border-neutral-200 rounded p-3 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-neutral-700">Install as app</p>
+              <p className="text-xs text-neutral-400">Add ComplyDesk to your home screen or desktop for quick access</p>
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={async () => {
+                installPrompt.prompt()
+                const result = await installPrompt.userChoice
+                if (result.outcome === 'accepted') setInstallPrompt(null)
+              }}
+            >
+              Install
+            </Button>
+          </div>
+        )}
+
+        <p className="text-xs text-neutral-400">
+          Notifications are generated locally in your browser. No data is sent to any server.
+        </p>
       </section>
 
       {/* Password */}

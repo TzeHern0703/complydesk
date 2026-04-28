@@ -1,17 +1,44 @@
 import { format, isBefore } from 'date-fns'
 import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { useStore } from '../store/useStore'
 import { TaskSection } from '../components/tasks/TaskSection'
 import { ProgressBar } from '../components/ui/ProgressBar'
+import { DashboardBanner } from '../components/notifications/DashboardBanner'
+import { NotificationPermissionCard } from '../components/notifications/NotificationPermissionCard'
 import { isOverdue, isDueThisWeek, daysUntil } from '../lib/dateUtils'
 import { getWeekStart, weekStartToString, formatTime12h } from '../lib/weekUtils'
+import { supportsNotifications, getNotificationPermission, formatTodayDate } from '../lib/notificationUtils'
 import type { PersonalTask } from '../types'
 
 export function Dashboard() {
-  const { tasks, clients, templates, settings } = useStore()
+  const { tasks, clients, templates, settings, updateSettings } = useStore()
   const now = new Date()
   const activeClients = clients.filter((c) => c.isActive)
   const activeClientIds = new Set(activeClients.map((c) => c.id))
+
+  const [bannerDismissed, setBannerDismissed] = useState(
+    settings?.notificationBannerDismissedDate === formatTodayDate()
+  )
+  const [permissionCardDismissed, setPermissionCardDismissed] = useState(false)
+
+  // Track dashboard visits for soft permission ask timing
+  useEffect(() => {
+    const visitCount = (settings?.dashboardVisitCount ?? 0) + 1
+    updateSettings({ dashboardVisitCount: visitCount })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleDismissBanner() {
+    setBannerDismissed(true)
+    await updateSettings({ notificationBannerDismissedDate: formatTodayDate() })
+  }
+
+  const showPermissionCard =
+    !permissionCardDismissed &&
+    supportsNotifications() &&
+    getNotificationPermission() === 'default' &&
+    (settings?.dashboardVisitCount ?? 0) >= 2 &&
+    !settings?.notificationPermissionDismissedAt
 
   const activeTasks = tasks.filter((t) => {
     if (!activeClientIds.has(t.clientId)) return false
@@ -58,6 +85,18 @@ export function Dashboard() {
         <h1 className="text-lg font-medium text-neutral-900">Dashboard</h1>
         <p className="text-sm text-neutral-400 mt-0.5">{format(now, 'EEEE, d MMMM yyyy')}</p>
       </div>
+
+      {!bannerDismissed && (
+        <DashboardBanner
+          overdueCount={overdue.length}
+          thisWeekCount={thisWeek.length}
+          onDismiss={handleDismissBanner}
+        />
+      )}
+
+      {showPermissionCard && (
+        <NotificationPermissionCard onDismiss={() => setPermissionCardDismissed(true)} />
+      )}
 
       <div className="bg-white border border-neutral-200 rounded p-4">
         <ProgressBar

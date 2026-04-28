@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { nanoid } from 'nanoid'
-import type { Client, Task, TaskTemplate, ClientTemplateAssignment, AppSettings, EmailMessage, EmailFilter, ClientEmailRule, PersonalTask, RecurringWeeklyInstance, TaskHistory } from '../types'
+import type { Client, Task, TaskTemplate, ClientTemplateAssignment, AppSettings, EmailMessage, PersonalTask, RecurringWeeklyInstance, TaskHistory } from '../types'
 import * as q from '../db/queries'
 
 interface AppState {
@@ -13,6 +13,7 @@ interface AppState {
   personalTasks: PersonalTask[]
   recurringInstances: RecurringWeeklyInstance[]
   taskHistory: TaskHistory[]
+  notificationReadIds: Set<string>
   isLocked: boolean
   isLoading: boolean
 
@@ -53,16 +54,12 @@ interface AppState {
   updateTaskNotes: (id: string, notes: string) => Promise<void>
   updateTaskDeadline: (id: string, deadline: Date) => Promise<void>
 
-  updateSettings: (data: Partial<{
-    passwordHash: string
-    passwordEnabled: boolean
-    gmailClientId: string
-    gmailAccessToken: string
-    gmailTokenExpiry: number
-    emailFilters: EmailFilter[]
-    clientEmailRules: ClientEmailRule[]
-  }>) => Promise<void>
+  updateSettings: (data: Partial<Omit<AppSettings, 'id' | 'isSeeded'>>) => Promise<void>
   setLocked: (locked: boolean) => void
+
+  loadNotificationReads: () => Promise<void>
+  markNotificationRead: (id: string) => Promise<void>
+  markAllNotificationsRead: (ids: string[]) => Promise<void>
 
   saveEmailMessages: (msgs: EmailMessage[]) => Promise<void>
   updateEmailProcessed: (id: string, isProcessed: boolean) => Promise<void>
@@ -79,6 +76,7 @@ export const useStore = create<AppState>((set, get) => ({
   personalTasks: [],
   recurringInstances: [],
   taskHistory: [],
+  notificationReadIds: new Set(),
   isLocked: false,
   isLoading: true,
 
@@ -87,7 +85,7 @@ export const useStore = create<AppState>((set, get) => ({
     await q.initializeDB()
     await q.ensureTasksGenerated()
     await q.ensureRecurringInstancesGenerated()
-    const [clients, templates, tasks, assignments, settings, emailMessages, personalTasks, recurringInstances, taskHistory] = await Promise.all([
+    const [clients, templates, tasks, assignments, settings, emailMessages, personalTasks, recurringInstances, taskHistory, notificationReadIds] = await Promise.all([
       q.getAllClients(),
       q.getAllTemplates(),
       q.getAllTasks(),
@@ -97,8 +95,9 @@ export const useStore = create<AppState>((set, get) => ({
       q.getAllPersonalTasks(),
       q.getAllRecurringInstances(),
       q.getAllTaskHistory(),
+      q.getNotificationReadIds(),
     ])
-    set({ clients, templates, tasks, assignments, settings, emailMessages, personalTasks, recurringInstances, taskHistory, isLoading: false })
+    set({ clients, templates, tasks, assignments, settings, emailMessages, personalTasks, recurringInstances, taskHistory, notificationReadIds, isLoading: false })
   },
 
   loadClients: async () => {
@@ -250,6 +249,21 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   setLocked: (locked) => set({ isLocked: locked }),
+
+  loadNotificationReads: async () => {
+    const notificationReadIds = await q.getNotificationReadIds()
+    set({ notificationReadIds })
+  },
+
+  markNotificationRead: async (id) => {
+    await q.markNotificationRead(id)
+    set((state) => ({ notificationReadIds: new Set([...state.notificationReadIds, id]) }))
+  },
+
+  markAllNotificationsRead: async (ids) => {
+    await q.markAllNotificationsRead(ids)
+    set((state) => ({ notificationReadIds: new Set([...state.notificationReadIds, ...ids]) }))
+  },
 
   saveEmailMessages: async (msgs) => {
     await q.bulkSaveEmailMessages(msgs)

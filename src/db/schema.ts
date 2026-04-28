@@ -12,6 +12,7 @@ class ComplyDeskDB extends Dexie {
   personalTasks!: EntityTable<PersonalTask, 'id'>
   recurringInstances!: EntityTable<RecurringWeeklyInstance, 'id'>
   taskHistory!: EntityTable<TaskHistory, 'id'>
+  notificationReads!: EntityTable<{ id: string }, 'id'>
 
   constructor() {
     super('ComplyDeskDB')
@@ -76,6 +77,18 @@ class ComplyDeskDB extends Dexie {
           }
         }
       })
+    })
+    this.version(5).stores({
+      clients: 'id, name, isActive, createdAt',
+      taskTemplates: 'id, category, isSystemDefault',
+      tasks: 'id, clientId, templateId, status, deadline, periodLabel',
+      assignments: 'id, clientId, templateId',
+      settings: 'id',
+      emailMessages: 'id, threadId, fromEmail, date, isProcessed, clientId, fetchedAt',
+      personalTasks: 'id, type, status, weekStart, createdAt',
+      recurringInstances: 'id, recurringTaskId, weekStart, weekday, status',
+      taskHistory: 'id, clientId, templateId, completedDate, createdAt',
+      notificationReads: 'id',
     })
   }
 }

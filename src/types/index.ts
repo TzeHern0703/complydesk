@@ -87,6 +87,15 @@ export interface AppSettings {
   gmailTokenExpiry?: number
   emailFilters?: EmailFilter[]
   clientEmailRules?: ClientEmailRule[]
+  // Notifications
+  notificationEnabled?: boolean
+  notificationDailyTime?: string       // "HH:mm", default "09:00"
+  notificationAlertOverdue?: boolean
+  notificationAlertDueToday?: boolean
+  notificationPermissionDismissedAt?: string  // ISO datetime
+  notificationLastDailyAt?: string            // ISO date "yyyy-MM-dd"
+  notificationBannerDismissedDate?: string    // ISO date "yyyy-MM-dd"
+  dashboardVisitCount?: number
 }
 
 // Email types

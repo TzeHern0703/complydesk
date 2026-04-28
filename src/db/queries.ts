@@ -2,7 +2,7 @@ import { addDays } from 'date-fns'
 import { nanoid } from 'nanoid'
 import { db } from './schema'
 import { SYSTEM_TEMPLATES } from './seed'
-import type { Client, Task, TaskTemplate, ClientTemplateAssignment, EmailMessage, EmailFilter, ClientEmailRule, PersonalTask, RecurringWeeklyInstance, TaskHistory } from '../types'
+import type { Client, Task, TaskTemplate, ClientTemplateAssignment, EmailMessage, PersonalTask, RecurringWeeklyInstance, TaskHistory } from '../types'
 import { generateTasksForAssignment } from '../lib/taskGenerator'
 import { getWeekStart, weekStartToString } from '../lib/weekUtils'
 import { getDefaultLeadTime, computeHiddenUntil } from '../lib/leadTime'
@@ -212,16 +212,26 @@ export async function getSettings() {
   return db.settings.get('app')
 }
 
-export async function updateSettings(data: Partial<{
-  passwordHash: string
-  passwordEnabled: boolean
-  gmailClientId: string
-  gmailAccessToken: string
-  gmailTokenExpiry: number
-  emailFilters: EmailFilter[]
-  clientEmailRules: ClientEmailRule[]
-}>) {
+export async function updateSettings(data: Partial<Omit<import('../types').AppSettings, 'id' | 'isSeeded'>>) {
   await db.settings.update('app', data)
+}
+
+// Notification reads
+export async function getNotificationReadIds(): Promise<Set<string>> {
+  const all = await db.notificationReads.toArray()
+  return new Set(all.map((r) => r.id))
+}
+
+export async function markNotificationRead(id: string): Promise<void> {
+  await db.notificationReads.put({ id })
+}
+
+export async function markAllNotificationsRead(ids: string[]): Promise<void> {
+  await db.notificationReads.bulkPut(ids.map((id) => ({ id })))
+}
+
+export async function clearNotificationReads(): Promise<void> {
+  await db.notificationReads.clear()
 }
 
 // Email messages
