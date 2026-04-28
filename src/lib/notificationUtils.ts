@@ -54,26 +54,35 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
   return Notification.requestPermission()
 }
 
-export async function sendBrowserNotification(title: string, body: string): Promise<boolean> {
-  if (!supportsNotifications() || Notification.permission !== 'granted') return false
+export async function sendBrowserNotification(title: string, body: string): Promise<{ sent: boolean; error?: string }> {
+  if (!supportsNotifications()) {
+    return { sent: false, error: 'Notifications API not supported in this browser' }
+  }
+  if (Notification.permission !== 'granted') {
+    return { sent: false, error: `Permission is "${Notification.permission}" — not granted` }
+  }
 
-  // Use service worker showNotification when available (required for PWAs in Chrome)
+  // Try service worker showNotification (required for Chrome PWA)
   if ('serviceWorker' in navigator) {
     try {
       const reg = await navigator.serviceWorker.getRegistration()
       if (reg) {
         await reg.showNotification(title, { body, icon: '/favicon.ico' })
-        return true
+        return { sent: true }
       }
-    } catch {
-      // fall through to direct Notification
+    } catch (e: any) {
+      // SW failed — fall through to direct API
     }
   }
 
-  // Fallback: direct Notification API
-  const n = new Notification(title, { body, icon: '/favicon.ico' })
-  n.onclick = () => { window.focus(); n.close() }
-  return true
+  // Direct Notification fallback
+  try {
+    const n = new Notification(title, { body, icon: '/favicon.ico' })
+    n.onclick = () => { window.focus(); n.close() }
+    return { sent: true }
+  } catch (e: any) {
+    return { sent: false, error: e?.message ?? 'Unknown error' }
+  }
 }
 
 export function formatTodayDate(): string {

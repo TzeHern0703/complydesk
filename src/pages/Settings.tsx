@@ -223,13 +223,13 @@ export function Settings() {
   }
 
   async function handleTestNotification() {
-    const sent = await sendBrowserNotification('ComplyDesk — Test', 'Notifications are working correctly.')
-    if (sent) {
-      setNotifSaveMsg('Test notification sent!')
+    const result = await sendBrowserNotification('ComplyDesk — Test', 'Notifications are working correctly.')
+    if (result.sent) {
+      setNotifSaveMsg('Test notification sent! Check your system notifications.')
     } else {
-      setNotifSaveMsg('Could not send — check that notifications are allowed in your browser settings.')
+      setNotifSaveMsg(`Failed: ${result.error}`)
     }
-    setTimeout(() => setNotifSaveMsg(''), 4000)
+    setTimeout(() => setNotifSaveMsg(''), 6000)
   }
 
   const filterTypeLabels: Record<EmailFilter['type'], string> = {
@@ -464,6 +464,18 @@ export function Settings() {
               )}
             </div>
 
+            <p className="text-xs text-neutral-400">
+              Browser permission status: <span className="font-mono text-neutral-600">{notifPermission}</span>
+              {notifPermission !== getNotificationPermission() && (
+                <button
+                  onClick={() => setNotifPermission(getNotificationPermission())}
+                  className="ml-2 underline underline-offset-2 hover:text-neutral-900"
+                >
+                  Refresh
+                </button>
+              )}
+            </p>
+
             {settings?.notificationEnabled && (
               <>
                 <div className="space-y-3">
@@ -507,7 +519,7 @@ export function Settings() {
               </>
             )}
 
-            {notifSaveMsg && <p className="text-xs text-neutral-600">{notifSaveMsg}</p>}
+            {notifSaveMsg && <p className="text-xs text-neutral-700 font-medium">{notifSaveMsg}</p>}
           </div>
         )}
 
