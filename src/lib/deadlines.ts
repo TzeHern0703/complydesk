@@ -28,6 +28,17 @@ export function getDeadlineForPeriod(template: TaskTemplate, periodLabel: string
     return endOfMonth(new Date(dueYear, dueMonth - 1, 1))
   }
 
+  if (template.category === 'quarterly') {
+    // periodLabel: "YYYY-Q1" | "YYYY-Q2" | "YYYY-Q3" | "YYYY-Q4"
+    const [yearStr, quarter] = periodLabel.split('-')
+    const year = Number(yearStr)
+    // Deadline = end of the month after quarter end (standard Malaysian practice)
+    const quarterEndMonth0 = { Q1: 2, Q2: 5, Q3: 8, Q4: 11 }[quarter] ?? 2 // 0-indexed Mar/Jun/Sep/Dec
+    const dueMonth0 = quarterEndMonth0 + 1 > 11 ? 0 : quarterEndMonth0 + 1
+    const dueYear = quarterEndMonth0 + 1 > 11 ? year + 1 : year
+    return endOfMonth(new Date(dueYear, dueMonth0, 1))
+  }
+
   if (template.category === 'half-yearly') {
     // periodLabel: "YYYY-H1" or "YYYY-H2"
     const [yearStr, half] = periodLabel.split('-')
@@ -74,6 +85,11 @@ export function getCurrentPeriodLabel(template: TaskTemplate, referenceDate?: Da
     return `${year}-${String(periodStart).padStart(2, '0')}/${String(periodEnd).padStart(2, '0')}`
   }
 
+  if (template.category === 'quarterly') {
+    const q = Math.ceil(month / 3)
+    return `${year}-Q${q}`
+  }
+
   if (template.category === 'half-yearly') {
     return month <= 6 ? `${year}-H1` : `${year}-H2`
   }
@@ -96,6 +112,13 @@ export function getNextPeriodLabel(template: TaskTemplate, currentLabel: string)
     const nextEnd = nextStart + 1 > 12 ? 1 : nextStart + 1
     const nextYear = endMonth + 1 > 12 ? year + 1 : year
     return `${nextYear}-${String(nextStart).padStart(2, '0')}/${String(nextEnd).padStart(2, '0')}`
+  }
+
+  if (template.category === 'quarterly') {
+    const [yearStr, q] = currentLabel.split('-')
+    const qNum = Number(q.replace('Q', ''))
+    if (qNum < 4) return `${yearStr}-Q${qNum + 1}`
+    return `${Number(yearStr) + 1}-Q1`
   }
 
   if (template.category === 'half-yearly') {
