@@ -49,10 +49,14 @@ export async function getTemplate(id: string): Promise<TaskTemplate | undefined>
 }
 
 export async function saveTemplate(template: TaskTemplate): Promise<void> {
+  const existing = await db.taskTemplates.get(template.id)
+  if (existing?.isSystemDefault) throw new Error('System templates cannot be modified')
   await db.taskTemplates.put(template)
 }
 
 export async function deleteTemplate(id: string): Promise<void> {
+  const existing = await db.taskTemplates.get(id)
+  if (existing?.isSystemDefault) throw new Error('System templates cannot be deleted')
   await db.transaction('rw', [db.taskTemplates, db.assignments, db.tasks], async () => {
     await db.tasks.where('templateId').equals(id).delete()
     await db.assignments.where('templateId').equals(id).delete()

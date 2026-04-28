@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, ExternalLink, Trash2, Edit, X } from 'lucide-react'
+import { Plus, ExternalLink, Trash2, Edit, X, Lock } from 'lucide-react'
 import { nanoid } from 'nanoid'
 import { useStore } from '../store/useStore'
 import type { TaskTemplate, DeadlineRule } from '../types'
@@ -53,8 +53,7 @@ export function Templates() {
               <TemplateRow
                 key={t.id}
                 template={t}
-                onEdit={() => { setEditTemplate(t); setShowForm(true) }}
-                onDelete={() => setDeleteId(t.id)}
+                readonly
               />
             ))}
           </div>
@@ -135,6 +134,11 @@ function TemplateRow({
         <p className="text-xs text-neutral-400 mt-0.5 truncate">{template.description}</p>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
+        {readonly && (
+          <span title="System template — read only">
+            <Lock size={13} className="text-neutral-300" />
+          </span>
+        )}
         <a
           href={template.governmentWebsite.url}
           target="_blank"
