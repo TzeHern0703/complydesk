@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { RefreshCw, Paperclip, ChevronDown, ChevronUp, Tag } from 'lucide-react'
+import DOMPurify from 'dompurify'
 import JSZip from 'jszip'
 import { format } from 'date-fns'
 import { useStore } from '../store/useStore'
@@ -290,7 +291,7 @@ function EmailRow({
             {msg.bodyHtml ? (
               <div
                 className="text-sm text-neutral-700 prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{ __html: msg.bodyHtml }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(msg.bodyHtml, { USE_PROFILES: { html: true } }) }}
               />
             ) : (
               <pre className="text-xs text-neutral-600 whitespace-pre-wrap font-sans">

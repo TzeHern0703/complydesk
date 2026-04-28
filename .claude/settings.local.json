@@ -9,7 +9,13 @@
       "Bash(npm ls *)",
       "Bash(git init *)",
       "Bash(git checkout *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "Bash(git config *)",
+      "Bash(git commit *)",
+      "Bash(curl -s https://api.github.com/users/TzeHern0703)",
+      "Bash(npm info *)"
     ]
   }
 }
