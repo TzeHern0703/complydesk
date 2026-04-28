@@ -65,8 +65,9 @@ export function Layout({ children }: LayoutProps) {
       if (overdueNow > 0) parts.push(`${overdueNow} overdue`)
       if (dueToday > 0) parts.push(`${dueToday} due today`)
       const body = parts.length > 0 ? parts.join(' and ') + '.' : 'No urgent tasks today.'
-      sendBrowserNotification('ComplyDesk — Today\'s tasks', body)
-      updateSettings({ notificationLastDailyAt: today })
+      sendBrowserNotification('ComplyDesk — Today\'s tasks', body).then(() => {
+        updateSettings({ notificationLastDailyAt: today })
+      })
     }
 
     checkDailyNotification()

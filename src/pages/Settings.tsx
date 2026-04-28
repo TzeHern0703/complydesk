@@ -222,8 +222,14 @@ export function Settings() {
     setTimeout(() => setNotifSaveMsg(''), 2000)
   }
 
-  function handleTestNotification() {
-    sendBrowserNotification('ComplyDesk — Test', 'Notifications are working correctly.')
+  async function handleTestNotification() {
+    const sent = await sendBrowserNotification('ComplyDesk — Test', 'Notifications are working correctly.')
+    if (sent) {
+      setNotifSaveMsg('Test notification sent!')
+    } else {
+      setNotifSaveMsg('Could not send — check that notifications are allowed in your browser settings.')
+    }
+    setTimeout(() => setNotifSaveMsg(''), 4000)
   }
 
   const filterTypeLabels: Record<EmailFilter['type'], string> = {
