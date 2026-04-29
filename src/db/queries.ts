@@ -395,37 +395,58 @@ async function ensureRecurringInstancesForWeeks(weekStarts: string[]): Promise<v
 
 // Export / Import
 export async function exportData() {
-  const [clients, taskTemplates, tasks, assignments, settings] = await Promise.all([
+  const [clients, taskTemplates, tasks, assignments, settings, taskHistory, personalTasks, recurringInstances] = await Promise.all([
     db.clients.toArray(),
     db.taskTemplates.toArray(),
     db.tasks.toArray(),
     db.assignments.toArray(),
     db.settings.toArray(),
+    db.taskHistory.toArray(),
+    db.personalTasks.toArray(),
+    db.recurringInstances.toArray(),
   ])
-  return { clients, taskTemplates, tasks, assignments, settings, exportedAt: new Date().toISOString() }
+  return { clients, taskTemplates, tasks, assignments, settings, taskHistory, personalTasks, recurringInstances, exportedAt: new Date().toISOString() }
 }
 
 export async function importData(
-  data: { clients: Client[]; taskTemplates: TaskTemplate[]; tasks: Task[]; assignments: ClientTemplateAssignment[] },
+  data: {
+    clients: Client[]
+    taskTemplates: TaskTemplate[]
+    tasks: Task[]
+    assignments: ClientTemplateAssignment[]
+    taskHistory?: TaskHistory[]
+    personalTasks?: PersonalTask[]
+    recurringInstances?: RecurringWeeklyInstance[]
+  },
   replace: boolean
 ) {
+  const allTables = [db.clients, db.taskTemplates, db.tasks, db.assignments, db.settings, db.taskHistory, db.personalTasks, db.recurringInstances]
   if (replace) {
-    await db.transaction('rw', [db.clients, db.taskTemplates, db.tasks, db.assignments, db.settings], async () => {
+    await db.transaction('rw', allTables, async () => {
       await db.clients.clear()
       await db.taskTemplates.clear()
       await db.tasks.clear()
       await db.assignments.clear()
+      await db.taskHistory.clear()
+      await db.personalTasks.clear()
+      await db.recurringInstances.clear()
       await db.clients.bulkPut(data.clients)
       await db.taskTemplates.bulkPut(data.taskTemplates)
       await db.tasks.bulkPut(data.tasks)
       await db.assignments.bulkPut(data.assignments)
+      if (data.taskHistory?.length) await db.taskHistory.bulkPut(data.taskHistory)
+      if (data.personalTasks?.length) await db.personalTasks.bulkPut(data.personalTasks)
+      if (data.recurringInstances?.length) await db.recurringInstances.bulkPut(data.recurringInstances)
     })
   } else {
-    await db.transaction('rw', [db.clients, db.taskTemplates, db.tasks, db.assignments], async () => {
+    await db.transaction('rw', allTables, async () => {
       await db.clients.bulkPut(data.clients)
       await db.taskTemplates.bulkPut(data.taskTemplates)
       await db.tasks.bulkPut(data.tasks)
       await db.assignments.bulkPut(data.assignments)
+      if (data.taskHistory?.length) await db.taskHistory.bulkPut(data.taskHistory)
+      if (data.personalTasks?.length) await db.personalTasks.bulkPut(data.personalTasks)
+      if (data.recurringInstances?.length) await db.recurringInstances.bulkPut(data.recurringInstances)
     })
   }
 }
