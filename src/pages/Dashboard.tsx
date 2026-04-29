@@ -6,7 +6,7 @@ import { TaskSection } from '../components/tasks/TaskSection'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { DashboardBanner } from '../components/notifications/DashboardBanner'
 import { NotificationPermissionCard } from '../components/notifications/NotificationPermissionCard'
-import { isOverdue, isDueThisWeek, daysUntil } from '../lib/dateUtils'
+import { isOverdue, isDueThisWeek, isDueThisMonth, daysUntil } from '../lib/dateUtils'
 import { getWeekStart, weekStartToString, formatTime12h } from '../lib/weekUtils'
 import { supportsNotifications, getNotificationPermission, formatTodayDate } from '../lib/notificationUtils'
 import type { PersonalTask } from '../types'
@@ -59,11 +59,11 @@ export function Dashboard() {
       t.status === 'pending' &&
       !isOverdue(t.deadline) &&
       !isDueThisWeek(t.deadline) &&
-      daysUntil(t.deadline) <= 31
+      isDueThisMonth(t.deadline)
   )
 
   const upcoming = activeTasks.filter(
-    (t) => t.status === 'pending' && daysUntil(t.deadline) > 31
+    (t) => t.status === 'pending' && !isOverdue(t.deadline) && !isDueThisWeek(t.deadline) && !isDueThisMonth(t.deadline)
   )
 
   const postponed = activeTasks.filter((t) => t.status === 'postponed')

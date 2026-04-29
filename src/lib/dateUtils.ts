@@ -1,4 +1,4 @@
-import { format, isToday, isTomorrow, differenceInDays, startOfDay } from 'date-fns'
+import { format, isToday, isTomorrow, differenceInDays, startOfDay, isSameMonth } from 'date-fns'
 
 export function formatDeadline(date: Date | string): string {
   const d = typeof date === 'string' ? new Date(date) : date
@@ -18,12 +18,13 @@ export function isOverdue(date: Date | string): boolean {
 
 export function isDueThisWeek(date: Date | string): boolean {
   const days = daysUntil(date)
-  return days >= 0 && days <= 7
+  return days >= 0 && days < 7
 }
 
 export function isDueThisMonth(date: Date | string): boolean {
+  const d = typeof date === 'string' ? new Date(date) : date
   const days = daysUntil(date)
-  return days >= 0 && days <= 31
+  return days >= 0 && isSameMonth(d, new Date())
 }
 
 export function formatPeriodLabel(label: string): string {

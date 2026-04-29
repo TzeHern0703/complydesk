@@ -8,7 +8,7 @@ import { ClientForm } from '../components/clients/ClientForm'
 import { Modal } from '../components/ui/Modal'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { Button } from '../components/ui/Button'
-import { isOverdue, isDueThisWeek, daysUntil } from '../lib/dateUtils'
+import { isOverdue, isDueThisWeek, isDueThisMonth } from '../lib/dateUtils'
 import { db } from '../db/schema'
 import type { ClientTemplateAssignment } from '../types'
 
@@ -33,9 +33,11 @@ export function ClientDetail() {
   const overdue = clientTasks.filter((t) => t.status === 'pending' && isOverdue(t.deadline))
   const thisWeek = clientTasks.filter((t) => t.status === 'pending' && isDueThisWeek(t.deadline))
   const thisMonth = clientTasks.filter(
-    (t) => t.status === 'pending' && !isOverdue(t.deadline) && !isDueThisWeek(t.deadline) && daysUntil(t.deadline) <= 31
+    (t) => t.status === 'pending' && !isOverdue(t.deadline) && !isDueThisWeek(t.deadline) && isDueThisMonth(t.deadline)
   )
-  const upcoming = clientTasks.filter((t) => t.status === 'pending' && daysUntil(t.deadline) > 31)
+  const upcoming = clientTasks.filter(
+    (t) => t.status === 'pending' && !isOverdue(t.deadline) && !isDueThisWeek(t.deadline) && !isDueThisMonth(t.deadline)
+  )
   const completed = clientTasks.filter((t) => t.status === 'completed')
   const postponed = clientTasks.filter((t) => t.status === 'postponed')
 
