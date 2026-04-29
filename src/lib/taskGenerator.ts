@@ -43,6 +43,7 @@ export function generateTasksForAssignment(
       for (const wd of weekdays) {
         const date = addDays(sunday, wd)
         const periodLabel = format(date, 'yyyy-MM-dd')
+        const hiddenUntil = computeHiddenUntil(date, leadTimeDays)
         tasks.push({
           id: `${assignment.clientId}-${template.id}-${periodLabel}`,
           clientId: assignment.clientId,
@@ -50,6 +51,7 @@ export function generateTasksForAssignment(
           periodLabel,
           deadline: date,
           isManualMode: false,
+          hiddenUntil,
           status: 'pending',
           createdAt: now,
         })
@@ -59,31 +61,31 @@ export function generateTasksForAssignment(
   }
 
   if (template.category === 'yearly' && template.deadlineRule.type === 'anniversary-based') {
-    // Anniversary-based: generate current year task
+    // Skip task generation entirely if no anniversary date is set
+    if (!assignment.anniversaryDate) return tasks
+
+    const anniversaryDate = new Date(assignment.anniversaryDate + 'T00:00:00')
     const year = now.getFullYear()
-    const yearLabel = String(year)
-    const taskId = `${assignment.clientId}-${template.id}-${yearLabel}`
-    tasks.push({
-      id: taskId,
-      clientId: assignment.clientId,
-      templateId: template.id,
-      periodLabel: yearLabel,
-      deadline: now, // Will be updated manually by user since it's anniversary-based
-      status: 'pending',
-      createdAt: now,
-    })
-    // Also generate next year
-    const nextYearLabel = String(year + 1)
-    const nextTaskId = `${assignment.clientId}-${template.id}-${nextYearLabel}`
-    tasks.push({
-      id: nextTaskId,
-      clientId: assignment.clientId,
-      templateId: template.id,
-      periodLabel: nextYearLabel,
-      deadline: new Date(year + 1, now.getMonth(), now.getDate()),
-      status: 'pending',
-      createdAt: now,
-    })
+
+    // Generate current and next year tasks based on anniversary date
+    for (const y of [year, year + 1]) {
+      const deadline = new Date(y, anniversaryDate.getMonth(), anniversaryDate.getDate())
+      // Skip if this year's task is already in the past
+      if (deadline < now && y === year) continue
+      const periodLabel = String(y)
+      const hiddenUntil = computeHiddenUntil(deadline, leadTimeDays)
+      tasks.push({
+        id: `${assignment.clientId}-${template.id}-${periodLabel}`,
+        clientId: assignment.clientId,
+        templateId: template.id,
+        periodLabel,
+        deadline,
+        isManualMode: false,
+        hiddenUntil,
+        status: 'pending',
+        createdAt: now,
+      })
+    }
     return tasks
   }
 
