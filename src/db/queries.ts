@@ -87,10 +87,32 @@ export async function setClientAssignments(
     const existingIds = new Set(existing.map((a) => a.templateId))
     const newIds = new Set(templateIds)
 
-    // Remove unselected
+    // Remove unselected assignments and clean up their tasks
     for (const a of existing) {
       if (!newIds.has(a.templateId)) {
         await db.assignments.delete(a.id)
+        const orphanTasks = await db.tasks
+          .where('templateId').equals(a.templateId)
+          .filter((t) => t.clientId === clientId)
+          .toArray()
+        const template = await db.taskTemplates.get(a.templateId)
+        for (const t of orphanTasks) {
+          if (t.status === 'completed' && template) {
+            const alreadyRecorded = await db.taskHistory.get(`${clientId}-${a.templateId}-${t.periodLabel}`)
+            if (!alreadyRecorded) {
+              await db.taskHistory.put({
+                id: `${clientId}-${a.templateId}-${t.periodLabel}`,
+                clientId,
+                templateId: a.templateId,
+                templateName: template.name,
+                completedDate: t.completedAt ?? new Date(),
+                completedDeadline: new Date(t.deadline),
+                createdAt: new Date(),
+              })
+            }
+          }
+          await db.tasks.delete(t.id)
+        }
       }
     }
 
