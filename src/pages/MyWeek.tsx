@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { addWeeks, addDays, format, isToday, isBefore } from 'date-fns'
-import { Plus, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react'
+import { Plus, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Pencil, Trash2 } from 'lucide-react'
 import { nanoid } from 'nanoid'
 import { useStore } from '../store/useStore'
 import type { PersonalTask, RecurringWeeklyInstance } from '../types'
@@ -219,19 +219,27 @@ function PersonalTaskRow({
             </span>
           )}
         </div>
-        <button onClick={() => setExpanded((v) => !v)} className="text-neutral-300 hover:text-neutral-600">
-          {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-        </button>
-      </div>
-      {expanded && (
-        <div className="border-t border-neutral-100 px-4 py-3 space-y-2">
-          {task.notes && <p className="text-xs text-neutral-500">{task.notes}</p>}
+        <div className="flex items-center gap-1 flex-shrink-0">
           {!readonly && (
-            <div className="flex gap-2">
-              <Button size="sm" variant="ghost" onClick={onEdit}>Edit</Button>
-              <Button size="sm" variant="ghost" onClick={onDelete}>Delete</Button>
-            </div>
+            <>
+              <button onClick={onEdit} className="p-1 text-neutral-300 hover:text-neutral-700 transition-colors">
+                <Pencil size={13} />
+              </button>
+              <button onClick={onDelete} className="p-1 text-neutral-300 hover:text-red-500 transition-colors">
+                <Trash2 size={13} />
+              </button>
+            </>
           )}
+          {task.notes && (
+            <button onClick={() => setExpanded((v) => !v)} className="p-1 text-neutral-300 hover:text-neutral-600">
+              {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+            </button>
+          )}
+        </div>
+      </div>
+      {expanded && task.notes && (
+        <div className="border-t border-neutral-100 px-4 py-3">
+          <p className="text-xs text-neutral-500">{task.notes}</p>
         </div>
       )}
     </div>
@@ -281,19 +289,27 @@ function RecurringInstanceRow({
           {time && <span className="text-xs text-neutral-400">{time}</span>}
           <span className="text-xs text-neutral-400">every {pattern}</span>
         </div>
-        <button onClick={() => setExpanded((v) => !v)} className="text-neutral-300 hover:text-neutral-600">
-          {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-        </button>
-      </div>
-      {expanded && (
-        <div className="border-t border-neutral-100 px-4 py-3 space-y-2">
-          {task.notes && <p className="text-xs text-neutral-500">{task.notes}</p>}
+        <div className="flex items-center gap-1 flex-shrink-0">
           {!readonly && (
-            <div className="flex gap-2">
-              <Button size="sm" variant="ghost" onClick={onEditTask}>Edit recurring</Button>
-              <Button size="sm" variant="ghost" onClick={onDeleteTask}>Delete recurring</Button>
-            </div>
+            <>
+              <button onClick={onEditTask} className="p-1 text-neutral-300 hover:text-neutral-700 transition-colors">
+                <Pencil size={13} />
+              </button>
+              <button onClick={onDeleteTask} className="p-1 text-neutral-300 hover:text-red-500 transition-colors">
+                <Trash2 size={13} />
+              </button>
+            </>
           )}
+          {task.notes && (
+            <button onClick={() => setExpanded((v) => !v)} className="p-1 text-neutral-300 hover:text-neutral-600">
+              {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+            </button>
+          )}
+        </div>
+      </div>
+      {expanded && task.notes && (
+        <div className="border-t border-neutral-100 px-4 py-3">
+          <p className="text-xs text-neutral-500">{task.notes}</p>
         </div>
       )}
     </div>
