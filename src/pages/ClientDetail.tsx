@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Edit, Trash2, CheckCircle } from 'lucide-react'
+import { ArrowLeft, Edit, Trash2, CheckCircle, AlertTriangle } from 'lucide-react'
 import { format } from 'date-fns'
 import { useStore } from '../store/useStore'
 import { TaskSection } from '../components/tasks/TaskSection'
@@ -19,9 +19,21 @@ export function ClientDetail() {
   const [showEdit, setShowEdit] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
   const [showAllHistory, setShowAllHistory] = useState(false)
+  const [assignments, setAssignments] = useState<ClientTemplateAssignment[]>([])
+
+  useEffect(() => {
+    if (id) db.assignments.where('clientId').equals(id).toArray().then(setAssignments)
+  }, [id])
 
   const client = clients.find((c) => c.id === id)
   if (!client || !id) return <div className="p-8 text-neutral-500 text-sm">Client not found.</div>
+
+  const missingAnniversaryTemplates = assignments
+    .filter((a) => {
+      const tmpl = templates.find((t) => t.id === a.templateId)
+      return tmpl?.deadlineRule.type === 'anniversary-based' && !a.anniversaryDate
+    })
+    .map((a) => templates.find((t) => t.id === a.templateId)?.name ?? a.templateId)
 
   const clientHistory = taskHistory
     .filter((h) => h.clientId === id)
@@ -81,6 +93,25 @@ export function ClientDetail() {
           </Button>
         </div>
       </div>
+
+      {missingAnniversaryTemplates.length > 0 && (
+        <div className="space-y-1.5">
+          {missingAnniversaryTemplates.map((name) => (
+            <div key={name} className="flex items-center justify-between gap-2 bg-amber-50 border border-amber-200 rounded px-3 py-2 text-sm text-amber-800">
+              <div className="flex items-center gap-2">
+                <AlertTriangle size={14} className="flex-shrink-0" />
+                <span>{name}: anniversary date not set — no tasks will be generated.</span>
+              </div>
+              <button
+                onClick={() => setShowEdit(true)}
+                className="text-xs font-medium underline underline-offset-2 whitespace-nowrap"
+              >
+                Set now
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       {overdue.length > 0 && (
         <TaskSection title="Overdue" tasks={overdue} clients={[client]} templates={templates} showClient={false} />

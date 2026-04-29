@@ -74,6 +74,17 @@ export function ClientForm({ client, assignments, onSave, onCancel, renderFooter
       setError('Client name is required')
       return
     }
+    // Validate anniversary dates are set for all anniversary-based templates
+    const missingAnniversary = Array.from(selectedTemplates).find((tid) => {
+      const tmpl = templates.find((t) => t.id === tid)
+      return tmpl?.deadlineRule.type === 'anniversary-based' && !anniversaryDates[tid]
+    })
+    if (missingAnniversary) {
+      const tmpl = templates.find((t) => t.id === missingAnniversary)
+      setError(`Anniversary date is required for "${tmpl?.name}". Set it in the Compliance Tasks section.`)
+      return
+    }
+
     setSaving(true)
     try {
       const id = client?.id ?? nanoid()
