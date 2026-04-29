@@ -6,7 +6,7 @@ import { TaskSection } from '../components/tasks/TaskSection'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { DashboardBanner } from '../components/notifications/DashboardBanner'
 import { NotificationPermissionCard } from '../components/notifications/NotificationPermissionCard'
-import { isOverdue, isDueThisWeek, isDueThisMonth, daysUntil } from '../lib/dateUtils'
+import { isOverdue, isDueThisWeek, isDueThisMonth } from '../lib/dateUtils'
 import { getWeekStart, weekStartToString, formatTime12h } from '../lib/weekUtils'
 import { supportsNotifications, getNotificationPermission, formatTodayDate } from '../lib/notificationUtils'
 import type { PersonalTask } from '../types'
@@ -72,7 +72,7 @@ export function Dashboard() {
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
   const monthTasks = activeTasks.filter((t) => {
     const d = new Date(t.deadline)
-    return d >= monthStart && d <= monthEnd && t.status !== 'skipped'
+    return d >= monthStart && d <= monthEnd && t.status !== 'skipped' && t.status !== 'postponed'
   })
   const completedThisMonth = monthTasks.filter((t) => t.status === 'completed')
 

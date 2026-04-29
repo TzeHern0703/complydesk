@@ -16,7 +16,7 @@ export interface DeadlineRule {
   dayOfYear?: { month: number; day: number }
   oneTimeDate?: string // ISO date string for one-time tasks
   weekdays?: number[] // 0=Sunday, 1=Monday, ..., 6=Saturday (for weekly type)
-  reminderDaysBefore: number[]
+  reminderDaysBefore?: number[]
 }
 
 export interface GovernmentWebsite {

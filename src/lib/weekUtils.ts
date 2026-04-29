@@ -33,6 +33,7 @@ export function weekdayToDate(weekStart: Date, weekday: number): Date {
 
 export function formatTime12h(time: string): string {
   const [h, m] = time.split(':').map(Number)
+  if (isNaN(h) || isNaN(m)) return time
   const period = h >= 12 ? 'PM' : 'AM'
   const hour = h % 12 || 12
   return `${hour}:${String(m).padStart(2, '0')} ${period}`

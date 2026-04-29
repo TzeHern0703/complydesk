@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, ExternalLink, Trash2, Edit, X, Lock } from 'lucide-react'
+import { Plus, ExternalLink, Trash2, Edit, Lock } from 'lucide-react'
 import { nanoid } from 'nanoid'
 import { useStore } from '../store/useStore'
 import type { TaskTemplate, DeadlineRule } from '../types'
@@ -188,10 +188,6 @@ function TemplateForm({
   const [selectedWeekdays, setSelectedWeekdays] = useState<number[]>(
     template?.deadlineRule.weekdays ?? []
   )
-  const [reminderDays, setReminderDays] = useState<number[]>(
-    template?.deadlineRule.reminderDaysBefore ?? [7, 1]
-  )
-  const [newReminder, setNewReminder] = useState('')
   const [websiteName, setWebsiteName] = useState(template?.governmentWebsite.name ?? '')
   const [websiteUrl, setWebsiteUrl] = useState(template?.governmentWebsite.url ?? '')
   const [description, setDescription] = useState(template?.description ?? '')
@@ -209,14 +205,6 @@ function TemplateForm({
     )
   }
 
-  function addReminder() {
-    const n = parseInt(newReminder)
-    if (!isNaN(n) && n > 0 && !reminderDays.includes(n)) {
-      setReminderDays((prev) => [...prev, n].sort((a, b) => b - a))
-    }
-    setNewReminder('')
-  }
-
   function handleSave() {
     if (!name.trim() || !websiteUrl.trim()) {
       setError('Name and website URL are required')
@@ -229,23 +217,21 @@ function TemplateForm({
 
     let rule: DeadlineRule
     if (category === 'weekly') {
-      rule = { type: 'weekly', weekdays: selectedWeekdays, reminderDaysBefore: reminderDays }
+      rule = { type: 'weekly', weekdays: selectedWeekdays }
     } else if (category === 'yearly' && deadlineType === 'anniversary-based') {
-      rule = { type: 'anniversary-based', reminderDaysBefore: reminderDays }
+      rule = { type: 'anniversary-based' }
     } else if (category === 'yearly' && deadlineType === 'day-of-year') {
       rule = {
         type: 'day-of-year',
         dayOfYear: { month: Number(yearlyMonth), day: Number(yearlyDay) },
-        reminderDaysBefore: reminderDays,
       }
     } else if (category === 'one-time') {
-      rule = { type: 'one-time', oneTimeDate, reminderDaysBefore: reminderDays }
+      rule = { type: 'one-time', oneTimeDate }
     } else {
       rule = {
         type: 'day-of-month',
         dayOfMonth: Number(dayOfMonth) || 15,
         monthsOfYear: selectedMonths.length > 0 ? selectedMonths : undefined,
-        reminderDaysBefore: reminderDays,
       }
     }
 
@@ -407,36 +393,6 @@ function TemplateForm({
           <p className="text-xs text-neutral-400 mt-1">Select at least one day</p>
         </div>
       )}
-
-      {/* Reminder days */}
-      <div>
-        <p className="text-sm font-medium text-neutral-700 mb-2">Reminder days before deadline</p>
-        <div className="flex flex-wrap gap-2 mb-2">
-          {reminderDays.map((d) => (
-            <span
-              key={d}
-              className="flex items-center gap-1 bg-neutral-100 text-neutral-700 text-xs px-2 py-1 rounded"
-            >
-              {d} day{d !== 1 ? 's' : ''}
-              <button onClick={() => setReminderDays((prev) => prev.filter((x) => x !== d))}>
-                <X size={10} />
-              </button>
-            </span>
-          ))}
-        </div>
-        <div className="flex gap-2">
-          <input
-            type="number"
-            min={1}
-            placeholder="e.g. 30"
-            value={newReminder}
-            onChange={(e) => setNewReminder(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && addReminder()}
-            className="w-24 rounded border border-neutral-200 px-3 py-1.5 text-sm focus:border-neutral-900 focus:outline-none"
-          />
-          <Button size="sm" variant="secondary" onClick={addReminder}>Add</Button>
-        </div>
-      </div>
 
       <div className="grid grid-cols-2 gap-4">
         <Input label="Website Name *" value={websiteName} onChange={(e) => setWebsiteName(e.target.value)} />
