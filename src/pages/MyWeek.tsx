@@ -142,12 +142,14 @@ function TodoForm({
   onCancel,
 }: {
   initial?: Partial<PersonalTask>
-  onSave: (d: Pick<PersonalTask, 'title' | 'notes' | 'deadline'>) => void
+  onSave: (d: Pick<PersonalTask, 'title' | 'notes' | 'deadline' | 'recurringMonths'>) => void
   onCancel: () => void
 }) {
   const [title, setTitle] = useState(initial?.title ?? '')
   const [notes, setNotes] = useState(initial?.notes ?? '')
   const [deadline, setDeadline] = useState(initial?.deadline ?? '')
+  const [isRecurring, setIsRecurring] = useState(!!(initial?.recurringMonths))
+  const [recurringMonths, setRecurringMonths] = useState(initial?.recurringMonths ?? 1)
   const [error, setError] = useState('')
 
   return (
@@ -156,11 +158,39 @@ function TodoForm({
       <Input label="Title *" value={title} onChange={(e) => setTitle(e.target.value)} />
       <Textarea label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
       <Input label="Deadline (optional)" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+      <label className="flex items-center gap-2 text-sm text-neutral-700 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={isRecurring}
+          onChange={(e) => setIsRecurring(e.target.checked)}
+          className="accent-neutral-900"
+        />
+        Recurring
+      </label>
+      {isRecurring && (
+        <div className="flex items-center gap-2 pl-6">
+          <span className="text-sm text-neutral-600">Repeat every</span>
+          <input
+            type="number"
+            min={1}
+            max={120}
+            value={recurringMonths}
+            onChange={(e) => setRecurringMonths(Math.max(1, Number(e.target.value)))}
+            className="w-16 rounded border border-neutral-200 px-2 py-1 text-sm focus:border-neutral-900 focus:outline-none"
+          />
+          <span className="text-sm text-neutral-600">months</span>
+        </div>
+      )}
       <div className="flex justify-end gap-2 pt-2">
         <Button variant="ghost" onClick={onCancel}>Cancel</Button>
         <Button variant="primary" onClick={() => {
           if (!title.trim()) { setError('Title is required'); return }
-          onSave({ title: title.trim(), notes: notes.trim() || undefined, deadline: deadline || undefined })
+          onSave({
+            title: title.trim(),
+            notes: notes.trim() || undefined,
+            deadline: deadline || undefined,
+            recurringMonths: isRecurring ? recurringMonths : undefined,
+          })
         }}>Save</Button>
       </div>
     </div>
@@ -212,6 +242,9 @@ function PersonalTaskRow({
             {task.title}
           </span>
           {time && <span className="text-xs text-neutral-400">{time}</span>}
+          {task.recurringMonths && (
+            <span className="text-xs text-neutral-400">↻ every {task.recurringMonths} month{task.recurringMonths !== 1 ? 's' : ''}</span>
+          )}
           {isOverdue && <span className="text-xs text-red-500">Overdue</span>}
           {task.deadline && !done && (
             <span className="text-xs text-neutral-400">
@@ -337,6 +370,8 @@ export function MyWeek() {
   const [addTodoOpen, setAddTodoOpen] = useState(false)
   const [editTask, setEditTask] = useState<PersonalTask | undefined>()
   const [deleteId, setDeleteId] = useState<string | undefined>()
+  const [recurringCompleteTodo, setRecurringCompleteTodo] = useState<PersonalTask | undefined>()
+  const [nextOccurrenceDate, setNextOccurrenceDate] = useState('')
 
   const weekStartStr = weekStartToString(weekStart)
   const weekDays = getWeekDays(weekStart)
@@ -381,9 +416,48 @@ export function MyWeek() {
     setAddRecurringOpen(false)
   }
 
-  async function handleAddTodo(data: Pick<PersonalTask, 'title' | 'notes' | 'deadline'>) {
+  async function handleAddTodo(data: Pick<PersonalTask, 'title' | 'notes' | 'deadline' | 'recurringMonths'>) {
     await savePersonalTask({ id: nanoid(), type: 'todo', status: 'pending', createdAt: new Date(), ...data })
     setAddTodoOpen(false)
+  }
+
+  function suggestNextDate(todo: PersonalTask): string {
+    if (!todo.deadline || !todo.recurringMonths) return ''
+    const d = new Date(todo.deadline + 'T00:00:00')
+    d.setMonth(d.getMonth() + todo.recurringMonths)
+    return format(d, 'yyyy-MM-dd')
+  }
+
+  async function handleTodoToggle(todo: PersonalTask) {
+    if (todo.status === 'completed') {
+      await updatePersonalTaskStatus(todo.id, 'pending')
+      return
+    }
+    if (todo.recurringMonths && todo.deadline) {
+      setNextOccurrenceDate(suggestNextDate(todo))
+      setRecurringCompleteTodo(todo)
+      return
+    }
+    await updatePersonalTaskStatus(todo.id, 'completed')
+  }
+
+  async function handleRecurringCompleteConfirm(skipNext: boolean) {
+    if (!recurringCompleteTodo) return
+    await updatePersonalTaskStatus(recurringCompleteTodo.id, 'completed')
+    if (!skipNext && nextOccurrenceDate) {
+      await savePersonalTask({
+        id: nanoid(),
+        type: 'todo',
+        title: recurringCompleteTodo.title,
+        notes: recurringCompleteTodo.notes,
+        deadline: nextOccurrenceDate,
+        recurringMonths: recurringCompleteTodo.recurringMonths,
+        status: 'pending',
+        createdAt: new Date(),
+      })
+    }
+    setRecurringCompleteTodo(undefined)
+    setNextOccurrenceDate('')
   }
 
   async function handleEditSave(data: Pick<PersonalTask, 'title' | 'notes'> & Partial<PersonalTask>) {
@@ -577,7 +651,7 @@ export function MyWeek() {
               <PersonalTaskRow
                 key={t.id}
                 task={t}
-                onToggle={() => updatePersonalTaskStatus(t.id, 'completed')}
+                onToggle={() => handleTodoToggle(t)}
                 onEdit={() => setEditTask(t)}
                 onDelete={() => setDeleteId(t.id)}
               />
@@ -667,6 +741,46 @@ export function MyWeek() {
         confirmLabel="Delete"
         danger
       />
+
+      {recurringCompleteTodo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setRecurringCompleteTodo(undefined)} />
+          <div className="relative bg-white border border-neutral-200 rounded-xl p-6 w-full max-w-sm space-y-4 shadow-lg">
+            <h2 className="text-base font-medium text-neutral-900">Set Next Occurrence</h2>
+            <p className="text-sm text-neutral-500">
+              <span className="font-medium text-neutral-900">"{recurringCompleteTodo.title}"</span> completed!
+              When is the next occurrence?
+            </p>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-neutral-700">Next deadline</label>
+              <input
+                type="date"
+                value={nextOccurrenceDate}
+                onChange={(e) => setNextOccurrenceDate(e.target.value)}
+                className="w-full rounded border border-neutral-200 px-3 py-2 text-sm focus:border-neutral-900 focus:outline-none"
+              />
+              {recurringCompleteTodo.deadline && (
+                <p className="text-xs text-neutral-400">
+                  Suggested: {suggestNextDate(recurringCompleteTodo)} ({recurringCompleteTodo.recurringMonths} month{recurringCompleteTodo.recurringMonths !== 1 ? 's' : ''} after current deadline)
+                </p>
+              )}
+            </div>
+            <div className="flex justify-between gap-2 pt-2">
+              <Button size="sm" variant="ghost" onClick={() => handleRecurringCompleteConfirm(true)}>
+                Don't repeat this time
+              </Button>
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={() => handleRecurringCompleteConfirm(false)}
+                disabled={!nextOccurrenceDate}
+              >
+                Save
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -155,6 +155,7 @@ export interface PersonalTask {
   recurringTime?: string   // "HH:mm"
   // todo
   deadline?: string        // ISO date string
+  recurringMonths?: number // if set, recurs every N months after completion
   // common
   status: 'pending' | 'completed'
   completedAt?: Date
