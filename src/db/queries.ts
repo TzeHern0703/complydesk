@@ -80,7 +80,9 @@ export async function setClientAssignments(
   anniversaryDates?: Record<string, string>,
   deadlineModes?: Record<string, 'auto' | 'manual'>,
   manualDeadlines?: Record<string, string>,
-  leadTimeDaysMap?: Record<string, number>
+  leadTimeDaysMap?: Record<string, number>,
+  loginUsernames?: Record<string, string>,
+  loginNotesMap?: Record<string, string>
 ): Promise<void> {
   await db.transaction('rw', [db.assignments, db.tasks, db.taskTemplates], async () => {
     const existing = await db.assignments.where('clientId').equals(clientId).toArray()
@@ -134,6 +136,8 @@ export async function setClientAssignments(
           deadlineMode: newMode,
           manualDeadline: newManualDeadline,
           leadTimeDays: newLeadTime,
+          loginUsername: loginUsernames?.[templateId] || undefined,
+          loginNotes: loginNotesMap?.[templateId] || undefined,
           createdAt: new Date(),
         }
         await db.assignments.put(assignment)
@@ -157,6 +161,8 @@ export async function setClientAssignments(
           deadlineMode: newMode,
           manualDeadline: newManualDeadline,
           leadTimeDays: newLeadTime,
+          loginUsername: loginUsernames?.[templateId] || undefined,
+          loginNotes: loginNotesMap?.[templateId] || undefined,
         })
 
         if ((modeChanged || deadlineChanged) && template) {

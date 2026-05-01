@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { ExternalLink, ChevronDown, ChevronUp } from 'lucide-react'
 import type { Task, Client, TaskTemplate } from '../../types'
 import { formatDeadline, daysUntil, formatPeriodLabel } from '../../lib/dateUtils'
@@ -25,10 +25,28 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
   const [deadlineInput, setDeadlineInput] = useState(
     format(new Date(task.deadline), 'yyyy-MM-dd')
   )
-  const { updateTaskStatus, updateTaskNotes, updateTaskDeadline, completeManualTask } = useStore()
+  const { updateTaskStatus, updateTaskNotes, updateTaskDeadline, completeManualTask, assignments } = useStore()
   const [showNextDeadline, setShowNextDeadline] = useState(false)
   const [nextDeadlineInput, setNextDeadlineInput] = useState('')
   const [nextLeadTime, setNextLeadTime] = useState(180)
+  const [toast, setToast] = useState<string | null>(null)
+
+  const assignment = assignments.find((a) => a.clientId === task.clientId && a.templateId === task.templateId)
+
+  const handleWebsiteClick = useCallback(async (url: string, e: React.MouseEvent) => {
+    const username = assignment?.loginUsername
+    if (!username) return // let the <a> handle it normally
+
+    e.preventDefault()
+    try {
+      await navigator.clipboard.writeText(username)
+      setToast(`✓ Username copied: ${username}`)
+    } catch {
+      setToast(`Username: ${username} (please copy manually)`)
+    }
+    setTimeout(() => setToast(null), 3000)
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }, [assignment?.loginUsername])
 
   const days = daysUntil(task.deadline)
   const isCompleted = task.status === 'completed'
@@ -142,7 +160,8 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
             target="_blank"
             rel="noopener noreferrer"
             className="text-neutral-300 hover:text-neutral-900 transition-colors"
-            title={`Open ${template.governmentWebsite.name}`}
+            title={assignment?.loginUsername ? `Copy username & open ${template.governmentWebsite.name}` : `Open ${template.governmentWebsite.name}`}
+            onClick={(e) => handleWebsiteClick(template.governmentWebsite.url, e)}
           >
             <ExternalLink size={14} />
           </a>
@@ -167,6 +186,7 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-xs text-neutral-700 hover:text-neutral-900 underline underline-offset-2"
+              onClick={(e) => handleWebsiteClick(template.governmentWebsite.url, e)}
             >
               <ExternalLink size={11} />
               {template.governmentWebsite.name}
@@ -177,12 +197,23 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-xs text-neutral-700 hover:text-neutral-900 underline underline-offset-2"
+                onClick={(e) => handleWebsiteClick(template.governmentWebsite.loginUrl!, e)}
               >
                 <ExternalLink size={11} />
                 Login page
               </a>
             )}
           </div>
+
+          {assignment?.loginUsername && (
+            <div className="text-xs text-neutral-500">
+              <span className="text-neutral-400">Username:</span>{' '}
+              <span className="font-mono">{assignment.loginUsername}</span>
+              {assignment.loginNotes && (
+                <span className="ml-2 text-neutral-400">({assignment.loginNotes})</span>
+              )}
+            </div>
+          )}
 
           {/* Inline deadline edit */}
           <div className="flex items-center gap-2">
@@ -301,6 +332,12 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
               </Button>
             </div>
           </div>
+        </div>
+      )}
+
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-neutral-900 text-white text-xs px-4 py-2.5 rounded-lg shadow-lg pointer-events-none">
+          {toast}
         </div>
       )}
     </div>

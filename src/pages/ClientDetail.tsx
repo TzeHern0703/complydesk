@@ -182,13 +182,15 @@ export function ClientDetail() {
 
 function EditClientFormWrapper({ clientId, onDone }: { clientId: string; onDone: () => void }) {
   const { clients } = useStore()
-  const [assignments, setAssignments] = useState<ClientTemplateAssignment[]>([])
+  const [assignments, setAssignments] = useState<ClientTemplateAssignment[] | null>(null)
   const client = clients.find((c) => c.id === clientId)
 
   useEffect(() => {
     db.assignments.where('clientId').equals(clientId).toArray().then(setAssignments)
   }, [clientId])
 
-  if (!client) return null
+  if (!client || assignments === null) {
+    return <div className="py-8 text-center text-sm text-neutral-400">Loading…</div>
+  }
   return <ClientForm client={client} assignments={assignments} onSave={onDone} onCancel={onDone} />
 }

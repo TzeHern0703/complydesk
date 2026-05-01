@@ -74,6 +74,8 @@ export interface ClientTemplateAssignment {
   deadlineMode: 'auto' | 'manual'
   manualDeadline?: string // ISO date, required when deadlineMode='manual'
   leadTimeDays: number   // days before deadline to show on dashboard (0 = always visible)
+  loginUsername?: string // username for this client at this government site
+  loginNotes?: string    // optional reminder (e.g. "use old phone for OTP")
   createdAt: Date
 }
 

@@ -47,6 +47,12 @@ export function ClientForm({ client, assignments, onSave, onCancel, renderFooter
   const [leadTimeDaysMap, setLeadTimeDaysMap] = useState<Record<string, number>>(
     Object.fromEntries((assignments ?? []).map((a) => [a.templateId, a.leadTimeDays ?? 0]))
   )
+  const [loginUsernames, setLoginUsernames] = useState<Record<string, string>>(
+    Object.fromEntries((assignments ?? []).filter((a) => a.loginUsername).map((a) => [a.templateId, a.loginUsername!]))
+  )
+  const [loginNotesMap, setLoginNotesMap] = useState<Record<string, string>>(
+    Object.fromEntries((assignments ?? []).filter((a) => a.loginNotes).map((a) => [a.templateId, a.loginNotes!]))
+  )
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -99,7 +105,7 @@ export function ClientForm({ client, assignments, onSave, onCancel, renderFooter
         createdAt: client?.createdAt ?? new Date(),
       }
       await saveClient(saved)
-      await setClientAssignments(id, Array.from(selectedTemplates), clientNote.trim() || undefined, anniversaryDates, deadlineModes, manualDeadlines, leadTimeDaysMap)
+      await setClientAssignments(id, Array.from(selectedTemplates), clientNote.trim() || undefined, anniversaryDates, deadlineModes, manualDeadlines, leadTimeDaysMap, loginUsernames, loginNotesMap)
       onSave()
     } finally {
       setSaving(false)
@@ -266,6 +272,34 @@ export function ClientForm({ client, assignments, onSave, onCancel, renderFooter
                                 </div>
                               </div>
                             )}
+
+                            {/* Login username */}
+                            <div className="space-y-1.5 pt-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-neutral-500 w-28 flex-shrink-0">Login username:</span>
+                                <input
+                                  type="text"
+                                  value={loginUsernames[t.id] ?? ''}
+                                  onChange={(e) =>
+                                    setLoginUsernames((prev) => ({ ...prev, [t.id]: e.target.value }))
+                                  }
+                                  placeholder="e.g. ACME_EPF_2020"
+                                  className="flex-1 rounded border border-neutral-200 px-2 py-1 text-xs focus:border-neutral-900 focus:outline-none"
+                                />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-neutral-500 w-28 flex-shrink-0">Login notes:</span>
+                                <input
+                                  type="text"
+                                  value={loginNotesMap[t.id] ?? ''}
+                                  onChange={(e) =>
+                                    setLoginNotesMap((prev) => ({ ...prev, [t.id]: e.target.value }))
+                                  }
+                                  placeholder="e.g. use old phone for OTP"
+                                  className="flex-1 rounded border border-neutral-200 px-2 py-1 text-xs focus:border-neutral-900 focus:outline-none"
+                                />
+                              </div>
+                            </div>
                           </div>
                         )}
                       </div>

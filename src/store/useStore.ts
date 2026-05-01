@@ -44,7 +44,9 @@ interface AppState {
     anniversaryDates?: Record<string, string>,
     deadlineModes?: Record<string, 'auto' | 'manual'>,
     manualDeadlines?: Record<string, string>,
-    leadTimeDaysMap?: Record<string, number>
+    leadTimeDaysMap?: Record<string, number>,
+    loginUsernames?: Record<string, string>,
+    loginNotesMap?: Record<string, string>
   ) => Promise<void>
 
   completeManualTask: (taskId: string, nextDeadline?: string, nextLeadTimeDays?: number) => Promise<void>
@@ -148,8 +150,8 @@ export const useStore = create<AppState>((set, get) => ({
     set({ templates, tasks })
   },
 
-  setClientAssignments: async (clientId, templateIds, clientNote, anniversaryDates, deadlineModes, manualDeadlines, leadTimeDaysMap) => {
-    await q.setClientAssignments(clientId, templateIds, clientNote, anniversaryDates, deadlineModes, manualDeadlines, leadTimeDaysMap)
+  setClientAssignments: async (clientId, templateIds, clientNote, anniversaryDates, deadlineModes, manualDeadlines, leadTimeDaysMap, loginUsernames, loginNotesMap) => {
+    await q.setClientAssignments(clientId, templateIds, clientNote, anniversaryDates, deadlineModes, manualDeadlines, leadTimeDaysMap, loginUsernames, loginNotesMap)
     const [tasks, assignments] = await Promise.all([q.getAllTasks(), q.getAllAssignments()])
     set({ tasks, assignments })
   },
