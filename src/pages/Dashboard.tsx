@@ -80,7 +80,8 @@ function DashboardPersonalRow({
     <div className={`border border-neutral-200 rounded bg-white transition-opacity ${isDone ? 'opacity-60' : ''}`}>
       <div className="flex items-center gap-3 px-4 py-3">
         <button
-          onClick={() => onComplete(item)}
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onComplete(item) }}
           className={`flex-shrink-0 w-4 h-4 rounded border transition-colors ${
             isDone ? 'bg-neutral-900 border-neutral-900' : 'border-neutral-300 hover:border-neutral-900'
           }`}
@@ -108,7 +109,8 @@ function DashboardPersonalRow({
             {deadlineLabel}
           </span>
           <button
-            onClick={() => navigate('/my-week')}
+            type="button"
+            onClick={(e) => { e.stopPropagation(); navigate('/my-week') }}
             className="text-xs text-neutral-400 hover:text-neutral-700 underline underline-offset-2"
           >
             view
@@ -161,6 +163,7 @@ function MixedSection({
   return (
     <div>
       <button
+        type="button"
         className="flex items-center gap-2 mb-3 w-full text-left"
         onClick={() => setCollapsed((v) => !v)}
       >
@@ -174,7 +177,8 @@ function MixedSection({
             <p className="text-sm text-neutral-400">{emptyMessage}</p>
           ) : (
             mergedItems.map((item) => {
-              if (item.type === 'compliance' && item.complianceTask && item.client && item.template) {
+              if (item.type === 'compliance') {
+                if (!item.complianceTask || !item.client || !item.template) return null
                 return (
                   <TaskRow
                     key={item.id}
@@ -470,6 +474,7 @@ function MyWeekWidget() {
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-neutral-900">My Week</h2>
         <button
+          type="button"
           onClick={() => navigate('/my-week')}
           className="text-xs text-neutral-400 hover:text-neutral-900 underline underline-offset-2"
         >

@@ -33,9 +33,14 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
 
   const assignment = assignments.find((a) => a.clientId === task.clientId && a.templateId === task.templateId)
 
-  const handleWebsiteClick = useCallback(async (url: string, e: React.MouseEvent) => {
+  const handleWebsiteClick = useCallback(async (url: string | undefined, e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!url) {
+      e.preventDefault()
+      return
+    }
     const username = assignment?.loginUsername
-    if (!username) return // let the <a> handle it normally
+    if (!username) return // let the <a> handle it normally (target=_blank)
 
     e.preventDefault()
     try {
@@ -96,7 +101,8 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
       <div className="flex items-center gap-3 px-4 py-3">
         {/* Checkbox */}
         <button
-          onClick={toggle}
+          type="button"
+          onClick={(e) => { e.stopPropagation(); toggle() }}
           className={`flex-shrink-0 w-4 h-4 rounded border transition-colors ${
             isCompleted
               ? 'bg-neutral-900 border-neutral-900'
@@ -156,7 +162,7 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
           </Badge>
 
           <a
-            href={template.governmentWebsite.url}
+            href={template.governmentWebsite.url || undefined}
             target="_blank"
             rel="noopener noreferrer"
             className="text-neutral-300 hover:text-neutral-900 transition-colors"
@@ -167,7 +173,8 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
           </a>
 
           <button
-            onClick={() => setExpanded((v) => !v)}
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setExpanded((v) => !v) }}
             className="text-neutral-300 hover:text-neutral-600 transition-colors"
           >
             {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -182,7 +189,7 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
 
           <div className="flex flex-wrap gap-3">
             <a
-              href={template.governmentWebsite.url}
+              href={template.governmentWebsite.url || undefined}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-xs text-neutral-700 hover:text-neutral-900 underline underline-offset-2"
