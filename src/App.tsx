@@ -21,6 +21,14 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    const handleVisibility = () => {
+      if (!document.hidden) loadAll()
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
+  }, [])
+
+  useEffect(() => {
     if (settings?.passwordEnabled && settings.passwordHash) {
       setLocked(true)
     }

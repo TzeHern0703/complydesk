@@ -158,11 +158,12 @@ export const useStore = create<AppState>((set, get) => ({
 
   updateTaskStatus: async (id, status) => {
     await q.updateTaskStatus(id, status)
+    let newEntry: import('../types').TaskHistory | undefined
     if (status === 'completed') {
       const task = get().tasks.find((t) => t.id === id)
       const template = task ? get().templates.find((t) => t.id === task.templateId) : undefined
       if (task && template && !task.isManualMode) {
-        await q.saveTaskHistory({
+        newEntry = {
           id: nanoid(),
           clientId: task.clientId,
           templateId: task.templateId,
@@ -170,11 +171,15 @@ export const useStore = create<AppState>((set, get) => ({
           completedDate: new Date(),
           completedDeadline: new Date(task.deadline),
           createdAt: new Date(),
-        })
+        }
+        await q.saveTaskHistory(newEntry)
       }
     }
-    const [tasks, taskHistory] = await Promise.all([q.getAllTasks(), q.getAllTaskHistory()])
-    set({ tasks, taskHistory })
+    const completedAt = status === 'completed' ? new Date() : undefined
+    set((state) => ({
+      tasks: state.tasks.map((t) => t.id === id ? { ...t, status, completedAt } : t),
+      taskHistory: newEntry ? [newEntry, ...state.taskHistory] : state.taskHistory,
+    }))
   },
 
   updateTaskNotes: async (id, notes) => {
@@ -234,20 +239,32 @@ export const useStore = create<AppState>((set, get) => ({
 
   updatePersonalTaskStatus: async (id, status) => {
     await q.updatePersonalTaskStatus(id, status)
-    const personalTasks = await q.getAllPersonalTasks()
-    set({ personalTasks })
+    const completedAt = status === 'completed' ? new Date() : undefined
+    set((state) => ({
+      personalTasks: state.personalTasks.map((t) => t.id === id ? { ...t, status, completedAt } : t),
+    }))
   },
 
   updateRecurringInstanceStatus: async (id, status) => {
     await q.updateRecurringInstanceStatus(id, status)
-    const recurringInstances = await q.getAllRecurringInstances()
-    set({ recurringInstances })
+    const completedAt = status === 'completed' ? new Date() : undefined
+    set((state) => ({
+      recurringInstances: state.recurringInstances.map((inst) =>
+        inst.id === id ? { ...inst, status, completedAt } : inst
+      ),
+    }))
   },
 
   ensureRecurringInstancesForWeek: async (weekStartStr) => {
     await q.ensureRecurringInstancesForWeek(weekStartStr)
-    const recurringInstances = await q.getAllRecurringInstances()
-    set({ recurringInstances })
+    const fetched = await q.getAllRecurringInstances()
+    // Only update if the DB returned data, or if store is already empty.
+    // Prevents an empty read-back from wiping good in-memory state.
+    set((state) => ({
+      recurringInstances: fetched.length > 0 || state.recurringInstances.length === 0
+        ? fetched
+        : state.recurringInstances,
+    }))
   },
 
   setLocked: (locked) => set({ isLocked: locked }),
