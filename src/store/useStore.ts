@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { nanoid } from 'nanoid'
-import type { Client, Task, TaskTemplate, ClientTemplateAssignment, AppSettings, EmailMessage, PersonalTask, RecurringWeeklyInstance, TaskHistory } from '../types'
+import type { Client, Task, TaskTemplate, ClientTemplateAssignment, AppSettings, EmailMessage, PersonalTask, RecurringWeeklyInstance, TaskHistory, ClientCustomTask } from '../types'
 import * as q from '../db/queries'
 
 interface AppState {
@@ -13,6 +13,7 @@ interface AppState {
   personalTasks: PersonalTask[]
   recurringInstances: RecurringWeeklyInstance[]
   taskHistory: TaskHistory[]
+  clientCustomTasks: ClientCustomTask[]
   notificationReadIds: Set<string>
   isLocked: boolean
   isLoading: boolean
@@ -52,6 +53,10 @@ interface AppState {
   completeManualTask: (taskId: string, nextDeadline?: string, nextLeadTimeDays?: number) => Promise<void>
   loadTaskHistory: () => Promise<void>
 
+  loadClientCustomTasks: () => Promise<void>
+  saveClientCustomTask: (ct: ClientCustomTask) => Promise<void>
+  deleteClientCustomTask: (id: string, clientId: string) => Promise<void>
+
   updateTaskStatus: (id: string, status: Task['status']) => Promise<void>
   updateTaskNotes: (id: string, notes: string) => Promise<void>
   updateTaskDeadline: (id: string, deadline: Date) => Promise<void>
@@ -78,6 +83,7 @@ export const useStore = create<AppState>((set, get) => ({
   personalTasks: [],
   recurringInstances: [],
   taskHistory: [],
+  clientCustomTasks: [],
   notificationReadIds: new Set(),
   isLocked: false,
   isLoading: true,
@@ -87,7 +93,7 @@ export const useStore = create<AppState>((set, get) => ({
     await q.initializeDB()
     await q.ensureTasksGenerated()
     await q.ensureRecurringInstancesGenerated()
-    const [clients, templates, tasks, assignments, settings, emailMessages, personalTasks, recurringInstances, taskHistory, notificationReadIds] = await Promise.all([
+    const [clients, templates, tasks, assignments, settings, emailMessages, personalTasks, recurringInstances, taskHistory, notificationReadIds, clientCustomTasks] = await Promise.all([
       q.getAllClients(),
       q.getAllTemplates(),
       q.getAllTasks(),
@@ -98,8 +104,9 @@ export const useStore = create<AppState>((set, get) => ({
       q.getAllRecurringInstances(),
       q.getAllTaskHistory(),
       q.getNotificationReadIds(),
+      q.getAllClientCustomTasks(),
     ])
-    set({ clients, templates, tasks, assignments, settings, emailMessages, personalTasks, recurringInstances, taskHistory, notificationReadIds, isLoading: false })
+    set({ clients, templates, tasks, assignments, settings, emailMessages, personalTasks, recurringInstances, taskHistory, notificationReadIds, clientCustomTasks, isLoading: false })
   },
 
   loadClients: async () => {
@@ -135,8 +142,8 @@ export const useStore = create<AppState>((set, get) => ({
 
   deleteClient: async (id) => {
     await q.deleteClient(id)
-    const [clients, tasks] = await Promise.all([q.getAllClients(), q.getAllTasks()])
-    set({ clients, tasks })
+    const [clients, tasks, clientCustomTasks] = await Promise.all([q.getAllClients(), q.getAllTasks(), q.getAllClientCustomTasks()])
+    set({ clients, tasks, clientCustomTasks })
   },
 
   saveTemplate: async (template) => {
@@ -161,13 +168,21 @@ export const useStore = create<AppState>((set, get) => ({
     let newEntry: import('../types').TaskHistory | undefined
     if (status === 'completed') {
       const task = get().tasks.find((t) => t.id === id)
-      const template = task ? get().templates.find((t) => t.id === task.templateId) : undefined
-      if (task && template && !task.isManualMode) {
+      const isCustom = task?.templateId.startsWith('custom:')
+      let historyTemplateName: string | undefined
+      if (isCustom) {
+        const customTaskId = task!.templateId.slice(7)
+        historyTemplateName = get().clientCustomTasks.find((ct) => ct.id === customTaskId)?.name
+      } else {
+        const template = task ? get().templates.find((t) => t.id === task.templateId) : undefined
+        historyTemplateName = template?.name
+      }
+      if (task && historyTemplateName && !task.isManualMode) {
         newEntry = {
           id: nanoid(),
           clientId: task.clientId,
           templateId: task.templateId,
-          templateName: template.name,
+          templateName: historyTemplateName,
           completedDate: new Date(),
           completedDeadline: new Date(task.deadline),
           createdAt: new Date(),
@@ -201,13 +216,20 @@ export const useStore = create<AppState>((set, get) => ({
 
   completeManualTask: async (taskId, nextDeadline, nextLeadTimeDays) => {
     const task = get().tasks.find((t) => t.id === taskId)
-    const template = task ? get().templates.find((t) => t.id === task.templateId) : undefined
-    if (!task || !template) return
-    await q.completeManualTask(task, template.name, nextDeadline, nextLeadTimeDays)
-    const [tasks, assignments, taskHistory] = await Promise.all([
-      q.getAllTasks(), q.getAllAssignments(), q.getAllTaskHistory(),
+    let templateName: string | undefined
+    const isCustom = task?.templateId.startsWith('custom:')
+    if (isCustom) {
+      const customTaskId = task!.templateId.slice(7)
+      templateName = get().clientCustomTasks.find((ct) => ct.id === customTaskId)?.name
+    } else {
+      templateName = get().templates.find((t) => t.id === task?.templateId)?.name
+    }
+    if (!task || !templateName) return
+    await q.completeManualTask(task, templateName, nextDeadline, nextLeadTimeDays)
+    const [tasks, assignments, taskHistory, clientCustomTasks] = await Promise.all([
+      q.getAllTasks(), q.getAllAssignments(), q.getAllTaskHistory(), q.getAllClientCustomTasks(),
     ])
-    set({ tasks, assignments, taskHistory })
+    set({ tasks, assignments, taskHistory, clientCustomTasks })
   },
 
   loadTaskHistory: async () => {
@@ -265,6 +287,23 @@ export const useStore = create<AppState>((set, get) => ({
         ? fetched
         : state.recurringInstances,
     }))
+  },
+
+  loadClientCustomTasks: async () => {
+    const clientCustomTasks = await q.getAllClientCustomTasks()
+    set({ clientCustomTasks })
+  },
+
+  saveClientCustomTask: async (ct) => {
+    await q.saveClientCustomTask(ct)
+    const [tasks, clientCustomTasks] = await Promise.all([q.getAllTasks(), q.getAllClientCustomTasks()])
+    set({ tasks, clientCustomTasks })
+  },
+
+  deleteClientCustomTask: async (id, clientId) => {
+    await q.deleteClientCustomTask(id, clientId)
+    const [tasks, clientCustomTasks] = await Promise.all([q.getAllTasks(), q.getAllClientCustomTasks()])
+    set({ tasks, clientCustomTasks })
   },
 
   setLocked: (locked) => set({ isLocked: locked }),

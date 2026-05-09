@@ -1,5 +1,5 @@
 import { addWeeks, startOfWeek, addDays, format } from 'date-fns'
-import type { ClientTemplateAssignment, Task, TaskTemplate } from '../types'
+import type { ClientTemplateAssignment, ClientCustomTask, Task, TaskTemplate } from '../types'
 import {
   getCurrentPeriodLabel,
   getNextPeriodLabel,
@@ -109,4 +109,34 @@ export function generateTasksForAssignment(
   }
 
   return tasks
+}
+
+export function toVirtualTemplate(ct: ClientCustomTask): TaskTemplate {
+  return {
+    id: `custom:${ct.id}`,
+    name: ct.name,
+    nameZh: ct.nameZh ?? '',
+    category: ct.category,
+    deadlineRule: ct.deadlineRule,
+    governmentWebsite: {
+      name: ct.governmentWebsite?.name ?? '',
+      url: ct.governmentWebsite?.url ?? '',
+    },
+    description: ct.description ?? '',
+    isSystemDefault: false,
+  }
+}
+
+export function generateTasksForCustomTask(ct: ClientCustomTask, referenceDate?: Date): Task[] {
+  const syntheticAssignment: ClientTemplateAssignment = {
+    id: `${ct.clientId}-custom:${ct.id}`,
+    clientId: ct.clientId,
+    templateId: `custom:${ct.id}`,
+    deadlineMode: ct.deadlineMode,
+    manualDeadline: ct.manualDeadline,
+    leadTimeDays: ct.leadTimeDays,
+    createdAt: ct.createdAt,
+  }
+  const virtualTemplate = toVirtualTemplate(ct)
+  return generateTasksForAssignment(syntheticAssignment, virtualTemplate, referenceDate)
 }

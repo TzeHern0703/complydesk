@@ -2,8 +2,8 @@ import { addDays } from 'date-fns'
 import { nanoid } from 'nanoid'
 import { db } from './schema'
 import { SYSTEM_TEMPLATES } from './seed'
-import type { Client, Task, TaskTemplate, ClientTemplateAssignment, EmailMessage, PersonalTask, RecurringWeeklyInstance, TaskHistory } from '../types'
-import { generateTasksForAssignment } from '../lib/taskGenerator'
+import type { Client, Task, TaskTemplate, ClientTemplateAssignment, EmailMessage, PersonalTask, RecurringWeeklyInstance, TaskHistory, ClientCustomTask } from '../types'
+import { generateTasksForAssignment, generateTasksForCustomTask } from '../lib/taskGenerator'
 import { getWeekStart, weekStartToString } from '../lib/weekUtils'
 import { getDefaultLeadTime, computeHiddenUntil } from '../lib/leadTime'
 
@@ -29,13 +29,14 @@ export async function saveClient(client: Client): Promise<void> {
 }
 
 export async function deleteClient(id: string): Promise<void> {
-  await db.transaction('rw', [db.clients, db.assignments, db.tasks], async () => {
+  await db.transaction('rw', [db.clients, db.assignments, db.tasks, db.clientCustomTasks], async () => {
     await db.clients.delete(id)
     const assignments = await db.assignments.where('clientId').equals(id).toArray()
     for (const a of assignments) {
       await db.tasks.where('clientId').equals(id).delete()
       await db.assignments.delete(a.id)
     }
+    await db.clientCustomTasks.where('clientId').equals(id).delete()
   })
 }
 
@@ -237,6 +238,15 @@ export async function ensureTasksGenerated(): Promise<void> {
       }
     }
   }
+
+  const customTasks = await db.clientCustomTasks.toArray()
+  for (const ct of customTasks.filter((ct) => ct.isActive)) {
+    const tasks = generateTasksForCustomTask(ct)
+    for (const task of tasks) {
+      const existing = await db.tasks.get(task.id)
+      if (!existing) await db.tasks.put(task)
+    }
+  }
 }
 
 // Settings
@@ -305,7 +315,7 @@ export async function completeManualTask(
   nextDeadline?: string,
   nextLeadTimeDays?: number
 ): Promise<void> {
-  await db.transaction('rw', [db.tasks, db.assignments, db.taskHistory], async () => {
+  await db.transaction('rw', [db.tasks, db.assignments, db.taskHistory, db.clientCustomTasks], async () => {
     // Mark complete
     await db.tasks.update(task.id, { status: 'completed', completedAt: new Date() })
 
@@ -323,8 +333,18 @@ export async function completeManualTask(
 
     if (nextDeadline) {
       const leadTime = nextLeadTimeDays ?? 180
-      const assignmentId = `${task.clientId}-${task.templateId}`
-      await db.assignments.update(assignmentId, { manualDeadline: nextDeadline, leadTimeDays: leadTime })
+      const isCustom = task.templateId.startsWith('custom:')
+      if (isCustom) {
+        const customTaskId = task.templateId.slice(7)
+        await db.clientCustomTasks.update(customTaskId, {
+          manualDeadline: nextDeadline,
+          leadTimeDays: leadTime,
+          updatedAt: new Date(),
+        })
+      } else {
+        const assignmentId = `${task.clientId}-${task.templateId}`
+        await db.assignments.update(assignmentId, { manualDeadline: nextDeadline, leadTimeDays: leadTime })
+      }
 
       const deadline = new Date(nextDeadline + 'T00:00:00')
       const hiddenUntil = computeHiddenUntil(deadline, leadTime)
@@ -419,6 +439,63 @@ async function ensureRecurringInstancesForWeeks(weekStarts: string[]): Promise<v
       }
     }
   }
+}
+
+// Client Custom Tasks
+export async function getAllClientCustomTasks(clientId?: string): Promise<ClientCustomTask[]> {
+  if (clientId) {
+    return db.clientCustomTasks.where('clientId').equals(clientId).toArray()
+  }
+  return db.clientCustomTasks.toArray()
+}
+
+export async function saveClientCustomTask(ct: ClientCustomTask): Promise<void> {
+  const existing = await db.clientCustomTasks.get(ct.id)
+  if (!existing) {
+    // New custom task
+    await db.clientCustomTasks.put(ct)
+    const tasks = generateTasksForCustomTask(ct)
+    await db.tasks.bulkPut(tasks)
+  } else {
+    const modeChanged = existing.deadlineMode !== ct.deadlineMode
+    const deadlineChanged = existing.manualDeadline !== ct.manualDeadline
+    const categoryChanged = existing.category !== ct.category
+    const ruleChanged = JSON.stringify(existing.deadlineRule) !== JSON.stringify(ct.deadlineRule)
+    const leadTimeChanged = existing.leadTimeDays !== ct.leadTimeDays
+
+    if (modeChanged || deadlineChanged || categoryChanged || ruleChanged) {
+      // Delete pending tasks and regenerate
+      await db.tasks
+        .where('templateId').equals(`custom:${ct.id}`)
+        .filter((t) => t.clientId === ct.clientId && t.status === 'pending')
+        .delete()
+      await db.clientCustomTasks.put(ct)
+      const tasks = generateTasksForCustomTask(ct)
+      await db.tasks.bulkPut(tasks)
+    } else if (leadTimeChanged) {
+      // Just update hiddenUntil on pending tasks
+      const pending = await db.tasks
+        .where('templateId').equals(`custom:${ct.id}`)
+        .filter((t) => t.clientId === ct.clientId && t.status === 'pending')
+        .toArray()
+      for (const t of pending) {
+        const hiddenUntil = computeHiddenUntil(new Date(t.deadline), ct.leadTimeDays)
+        await db.tasks.update(t.id, { hiddenUntil })
+      }
+      await db.clientCustomTasks.put(ct)
+    } else {
+      await db.clientCustomTasks.put(ct)
+    }
+  }
+}
+
+export async function deleteClientCustomTask(id: string, clientId: string): Promise<void> {
+  // Delete pending tasks for this custom task (preserve completed)
+  await db.tasks
+    .where('templateId').equals(`custom:${id}`)
+    .filter((t) => t.clientId === clientId && t.status === 'pending')
+    .delete()
+  await db.clientCustomTasks.delete(id)
 }
 
 // Export / Import

@@ -25,13 +25,23 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
   const [deadlineInput, setDeadlineInput] = useState(
     format(new Date(task.deadline), 'yyyy-MM-dd')
   )
-  const { updateTaskStatus, updateTaskNotes, updateTaskDeadline, completeManualTask, assignments } = useStore()
+  const { updateTaskStatus, updateTaskNotes, updateTaskDeadline, completeManualTask, assignments, clientCustomTasks } = useStore()
   const [showNextDeadline, setShowNextDeadline] = useState(false)
   const [nextDeadlineInput, setNextDeadlineInput] = useState('')
   const [nextLeadTime, setNextLeadTime] = useState(180)
   const [toast, setToast] = useState<string | null>(null)
 
-  const assignment = assignments.find((a) => a.clientId === task.clientId && a.templateId === task.templateId)
+  let loginUsername: string | undefined
+  let loginNotes: string | undefined
+  if (task.templateId.startsWith('custom:')) {
+    const ct = clientCustomTasks.find((ct) => ct.id === task.templateId.slice(7))
+    loginUsername = ct?.loginUsername
+    loginNotes = ct?.loginNotes
+  } else {
+    const assignment = assignments.find((a) => a.clientId === task.clientId && a.templateId === task.templateId)
+    loginUsername = assignment?.loginUsername
+    loginNotes = assignment?.loginNotes
+  }
 
   const handleWebsiteClick = useCallback(async (url: string | undefined, e: React.MouseEvent) => {
     e.stopPropagation()
@@ -39,19 +49,18 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
       e.preventDefault()
       return
     }
-    const username = assignment?.loginUsername
-    if (!username) return // let the <a> handle it normally (target=_blank)
+    if (!loginUsername) return // let the <a> handle it normally (target=_blank)
 
     e.preventDefault()
     try {
-      await navigator.clipboard.writeText(username)
-      setToast(`✓ Username copied: ${username}`)
+      await navigator.clipboard.writeText(loginUsername)
+      setToast(`✓ Username copied: ${loginUsername}`)
     } catch {
-      setToast(`Username: ${username} (please copy manually)`)
+      setToast(`Username: ${loginUsername} (please copy manually)`)
     }
     setTimeout(() => setToast(null), 3000)
     window.open(url, '_blank', 'noopener,noreferrer')
-  }, [assignment?.loginUsername])
+  }, [loginUsername])
 
   const days = daysUntil(task.deadline)
   const isCompleted = task.status === 'completed'
@@ -140,6 +149,9 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
             {task.isManualMode && (
               <span className="text-xs text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded">Manual</span>
             )}
+            {task.templateId.startsWith('custom:') && (
+              <span className="text-xs text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded">Custom</span>
+            )}
           </div>
         </div>
 
@@ -161,16 +173,18 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
               : formatDeadline(task.deadline)}
           </Badge>
 
-          <a
-            href={template.governmentWebsite.url || undefined}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-neutral-300 hover:text-neutral-900 transition-colors"
-            title={assignment?.loginUsername ? `Copy username & open ${template.governmentWebsite.name}` : `Open ${template.governmentWebsite.name}`}
-            onClick={(e) => handleWebsiteClick(template.governmentWebsite.url, e)}
-          >
-            <ExternalLink size={14} />
-          </a>
+          {template.governmentWebsite.url && (
+            <a
+              href={template.governmentWebsite.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-neutral-300 hover:text-neutral-900 transition-colors"
+              title={loginUsername ? `Copy username & open ${template.governmentWebsite.name}` : `Open ${template.governmentWebsite.name}`}
+              onClick={(e) => handleWebsiteClick(template.governmentWebsite.url, e)}
+            >
+              <ExternalLink size={14} />
+            </a>
+          )}
 
           <button
             type="button"
@@ -187,37 +201,41 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
         <div className="border-t border-neutral-100 px-4 py-3 space-y-3">
           <div className="text-xs text-neutral-500">{template.description}</div>
 
-          <div className="flex flex-wrap gap-3">
-            <a
-              href={template.governmentWebsite.url || undefined}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-neutral-700 hover:text-neutral-900 underline underline-offset-2"
-              onClick={(e) => handleWebsiteClick(template.governmentWebsite.url, e)}
-            >
-              <ExternalLink size={11} />
-              {template.governmentWebsite.name}
-            </a>
-            {template.governmentWebsite.loginUrl && template.governmentWebsite.loginUrl !== template.governmentWebsite.url && (
-              <a
-                href={template.governmentWebsite.loginUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-neutral-700 hover:text-neutral-900 underline underline-offset-2"
-                onClick={(e) => handleWebsiteClick(template.governmentWebsite.loginUrl!, e)}
-              >
-                <ExternalLink size={11} />
-                Login page
-              </a>
-            )}
-          </div>
+          {(template.governmentWebsite.url || template.governmentWebsite.loginUrl) && (
+            <div className="flex flex-wrap gap-3">
+              {template.governmentWebsite.url && (
+                <a
+                  href={template.governmentWebsite.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-neutral-700 hover:text-neutral-900 underline underline-offset-2"
+                  onClick={(e) => handleWebsiteClick(template.governmentWebsite.url, e)}
+                >
+                  <ExternalLink size={11} />
+                  {template.governmentWebsite.name || 'Website'}
+                </a>
+              )}
+              {template.governmentWebsite.loginUrl && template.governmentWebsite.loginUrl !== template.governmentWebsite.url && (
+                <a
+                  href={template.governmentWebsite.loginUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-neutral-700 hover:text-neutral-900 underline underline-offset-2"
+                  onClick={(e) => handleWebsiteClick(template.governmentWebsite.loginUrl!, e)}
+                >
+                  <ExternalLink size={11} />
+                  Login page
+                </a>
+              )}
+            </div>
+          )}
 
-          {assignment?.loginUsername && (
+          {loginUsername && (
             <div className="text-xs text-neutral-500">
               <span className="text-neutral-400">Username:</span>{' '}
-              <span className="font-mono">{assignment.loginUsername}</span>
-              {assignment.loginNotes && (
-                <span className="ml-2 text-neutral-400">({assignment.loginNotes})</span>
+              <span className="font-mono">{loginUsername}</span>
+              {loginNotes && (
+                <span className="ml-2 text-neutral-400">({loginNotes})</span>
               )}
             </div>
           )}

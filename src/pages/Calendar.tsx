@@ -2,14 +2,16 @@ import { useState } from 'react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay, isSameMonth, addMonths, subMonths } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useStore } from '../store/useStore'
+import { toVirtualTemplate } from '../lib/taskGenerator'
 import type { Task } from '../types'
 
 export function Calendar() {
-  const { tasks, clients, templates } = useStore()
+  const { tasks, clients, templates, clientCustomTasks } = useStore()
   const [currentMonth, setCurrentMonth] = useState(new Date())
 
   const clientMap = new Map(clients.map((c) => [c.id, c]))
   const templateMap = new Map(templates.map((t) => [t.id, t]))
+  clientCustomTasks.forEach((ct) => templateMap.set(`custom:${ct.id}`, toVirtualTemplate(ct)))
 
   const monthStart = startOfMonth(currentMonth)
   const monthEnd = endOfMonth(currentMonth)

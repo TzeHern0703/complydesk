@@ -10,6 +10,7 @@ import { NotificationPermissionCard } from '../components/notifications/Notifica
 import { isOverdue, isDueThisWeek, isDueThisMonth } from '../lib/dateUtils'
 import { getWeekStart, weekStartToString, formatTime12h } from '../lib/weekUtils'
 import { supportsNotifications, getNotificationPermission, formatTodayDate } from '../lib/notificationUtils'
+import { toVirtualTemplate } from '../lib/taskGenerator'
 import type { Task, Client, TaskTemplate, PersonalTask, RecurringWeeklyInstance } from '../types'
 
 // ── Unified task item for mixed sections ──────────────────────────────────────
@@ -207,8 +208,13 @@ function MixedSection({
 // ── Main Dashboard ─────────────────────────────────────────────────────────────
 
 export function Dashboard() {
-  const { tasks, clients, templates, settings, updateSettings, personalTasks, recurringInstances, updatePersonalTaskStatus, updateRecurringInstanceStatus } = useStore()
+  const { tasks, clients, templates, settings, updateSettings, personalTasks, recurringInstances, updatePersonalTaskStatus, updateRecurringInstanceStatus, clientCustomTasks } = useStore()
   const now = new Date()
+
+  const mergedTemplates = useMemo(
+    () => [...templates, ...clientCustomTasks.map(toVirtualTemplate)],
+    [templates, clientCustomTasks]
+  )
   const activeClients = clients.filter((c) => c.isActive)
   const activeClientIds = new Set(activeClients.map((c) => c.id))
 
@@ -382,7 +388,7 @@ export function Dashboard() {
           complianceTasks={compOverdue.sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())}
           personalItems={personalOverdue}
           clients={clients}
-          templates={templates}
+          templates={mergedTemplates}
           onPersonalComplete={handlePersonalComplete}
         />
       )}
@@ -392,7 +398,7 @@ export function Dashboard() {
         complianceTasks={compThisWeek.sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())}
         personalItems={personalThisWeek}
         clients={clients}
-        templates={templates}
+        templates={mergedTemplates}
         emptyMessage="No tasks due this week."
         onPersonalComplete={handlePersonalComplete}
       />
@@ -402,7 +408,7 @@ export function Dashboard() {
         complianceTasks={compThisMonth.sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())}
         personalItems={personalThisMonth}
         clients={clients}
-        templates={templates}
+        templates={mergedTemplates}
         emptyMessage="No other tasks due this month."
         onPersonalComplete={handlePersonalComplete}
       />
@@ -413,7 +419,7 @@ export function Dashboard() {
           complianceTasks={compUpcoming.sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())}
           personalItems={personalUpcoming}
           clients={clients}
-          templates={templates}
+          templates={mergedTemplates}
           defaultCollapsed
           onPersonalComplete={handlePersonalComplete}
         />
@@ -424,7 +430,7 @@ export function Dashboard() {
           title="Postponed"
           tasks={postponed}
           clients={clients}
-          templates={templates}
+          templates={mergedTemplates}
           defaultCollapsed
         />
       )}

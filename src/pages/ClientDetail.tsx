@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Edit, Trash2, CheckCircle, AlertTriangle } from 'lucide-react'
 import { format } from 'date-fns'
@@ -9,13 +9,24 @@ import { Modal } from '../components/ui/Modal'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { Button } from '../components/ui/Button'
 import { isOverdue, isDueThisWeek, isDueThisMonth } from '../lib/dateUtils'
+import { toVirtualTemplate } from '../lib/taskGenerator'
 import { db } from '../db/schema'
 import type { ClientTemplateAssignment } from '../types'
+
+const categoryLabels: Record<string, string> = {
+  weekly: 'Weekly',
+  monthly: 'Monthly',
+  'bi-monthly': 'Bi-Monthly',
+  'half-yearly': 'Half-Yearly',
+  quarterly: 'Quarterly',
+  'one-time': 'One-Time',
+  yearly: 'Yearly',
+}
 
 export function ClientDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { clients, tasks, templates, deleteClient, taskHistory } = useStore()
+  const { clients, tasks, templates, deleteClient, taskHistory, clientCustomTasks: allCustomTasks } = useStore()
   const [showEdit, setShowEdit] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
   const [showAllHistory, setShowAllHistory] = useState(false)
@@ -26,6 +37,13 @@ export function ClientDetail() {
   }, [id])
 
   const client = clients.find((c) => c.id === id)
+
+  const clientCustomTaskList = allCustomTasks.filter((ct) => ct.clientId === id)
+  const mergedTemplates = useMemo(
+    () => [...templates, ...clientCustomTaskList.map(toVirtualTemplate)],
+    [templates, clientCustomTaskList]
+  )
+
   if (!client || !id) return <div className="p-8 text-neutral-500 text-sm">Client not found.</div>
 
   const missingAnniversaryTemplates = assignments
@@ -114,18 +132,47 @@ export function ClientDetail() {
       )}
 
       {overdue.length > 0 && (
-        <TaskSection title="Overdue" tasks={overdue} clients={[client]} templates={templates} showClient={false} />
+        <TaskSection title="Overdue" tasks={overdue} clients={[client]} templates={mergedTemplates} showClient={false} />
       )}
-      <TaskSection title="Due This Week" tasks={thisWeek} clients={[client]} templates={templates} showClient={false} emptyMessage="None" />
-      <TaskSection title="Due This Month" tasks={thisMonth} clients={[client]} templates={templates} showClient={false} emptyMessage="None" />
+      <TaskSection title="Due This Week" tasks={thisWeek} clients={[client]} templates={mergedTemplates} showClient={false} emptyMessage="None" />
+      <TaskSection title="Due This Month" tasks={thisMonth} clients={[client]} templates={mergedTemplates} showClient={false} emptyMessage="None" />
       {upcoming.length > 0 && (
-        <TaskSection title="Upcoming" tasks={upcoming} clients={[client]} templates={templates} showClient={false} defaultCollapsed />
+        <TaskSection title="Upcoming" tasks={upcoming} clients={[client]} templates={mergedTemplates} showClient={false} defaultCollapsed />
       )}
       {completed.length > 0 && (
-        <TaskSection title="Completed" tasks={completed} clients={[client]} templates={templates} showClient={false} defaultCollapsed />
+        <TaskSection title="Completed" tasks={completed} clients={[client]} templates={mergedTemplates} showClient={false} defaultCollapsed />
       )}
       {postponed.length > 0 && (
-        <TaskSection title="Postponed" tasks={postponed} clients={[client]} templates={templates} showClient={false} defaultCollapsed />
+        <TaskSection title="Postponed" tasks={postponed} clients={[client]} templates={mergedTemplates} showClient={false} defaultCollapsed />
+      )}
+
+      {clientCustomTaskList.length > 0 && (
+        <div>
+          <p className="text-sm font-medium text-neutral-700 mb-2">Custom Tasks</p>
+          <div className="space-y-2">
+            {clientCustomTaskList.map((ct) => (
+              <div key={ct.id} className="border border-neutral-200 rounded px-4 py-3 bg-white">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <span className="text-sm font-medium text-neutral-900">{ct.name}</span>
+                    <span className="ml-2 text-xs bg-neutral-100 text-neutral-500 px-1.5 py-0.5 rounded">Custom</span>
+                    <span className="ml-2 text-xs text-neutral-400">
+                      {categoryLabels[ct.category]}
+                    </span>
+                  </div>
+                </div>
+                {ct.deadlineMode === 'manual' && ct.manualDeadline && (
+                  <p className="text-xs text-neutral-400 mt-1">
+                    Next deadline: {ct.manualDeadline}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-neutral-400 mt-2">
+            To add or edit custom tasks, use Edit Client.
+          </p>
+        </div>
       )}
 
       {clientHistory.length > 0 && (

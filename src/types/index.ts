@@ -170,3 +170,26 @@ export interface RecurringWeeklyInstance {
   status: 'pending' | 'completed'
   completedAt?: Date
 }
+
+export interface ClientCustomTask {
+  id: string
+  clientId: string
+  name: string
+  nameZh?: string
+  category: 'monthly' | 'bi-monthly' | 'quarterly' | 'half-yearly' | 'yearly' | 'one-time' | 'weekly'
+  deadlineRule: DeadlineRule
+  governmentWebsite?: {
+    name: string
+    url: string
+  }
+  description?: string
+  deadlineMode: 'auto' | 'manual'
+  manualDeadline?: string
+  leadTimeDays: number
+  loginUsername?: string
+  loginNotes?: string
+  notes?: string
+  isActive: boolean
+  createdAt: Date
+  updatedAt: Date
+}

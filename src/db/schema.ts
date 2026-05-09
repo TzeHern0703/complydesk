@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie'
-import type { Client, TaskTemplate, Task, ClientTemplateAssignment, AppSettings, EmailMessage, PersonalTask, RecurringWeeklyInstance, TaskHistory } from '../types'
+import type { Client, TaskTemplate, Task, ClientTemplateAssignment, AppSettings, EmailMessage, PersonalTask, RecurringWeeklyInstance, TaskHistory, ClientCustomTask } from '../types'
 import { getDefaultLeadTime } from '../lib/leadTime'
 
 class ComplyDeskDB extends Dexie {
@@ -13,6 +13,7 @@ class ComplyDeskDB extends Dexie {
   recurringInstances!: EntityTable<RecurringWeeklyInstance, 'id'>
   taskHistory!: EntityTable<TaskHistory, 'id'>
   notificationReads!: EntityTable<{ id: string }, 'id'>
+  clientCustomTasks!: EntityTable<ClientCustomTask, 'id'>
 
   constructor() {
     super('ComplyDeskDB')
@@ -89,6 +90,19 @@ class ComplyDeskDB extends Dexie {
       recurringInstances: 'id, recurringTaskId, weekStart, weekday, status',
       taskHistory: 'id, clientId, templateId, completedDate, createdAt',
       notificationReads: 'id',
+    })
+    this.version(6).stores({
+      clients: 'id, name, isActive, createdAt',
+      taskTemplates: 'id, category, isSystemDefault',
+      tasks: 'id, clientId, templateId, status, deadline, periodLabel',
+      assignments: 'id, clientId, templateId',
+      settings: 'id',
+      emailMessages: 'id, threadId, fromEmail, date, isProcessed, clientId, fetchedAt',
+      personalTasks: 'id, type, status, weekStart, createdAt',
+      recurringInstances: 'id, recurringTaskId, weekStart, weekday, status',
+      taskHistory: 'id, clientId, templateId, completedDate, createdAt',
+      notificationReads: 'id',
+      clientCustomTasks: 'id, clientId',
     })
   }
 }
