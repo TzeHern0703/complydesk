@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, ExternalLink, Trash2, Edit, Lock } from 'lucide-react'
+import { Plus, ExternalLink, Trash2, Edit } from 'lucide-react'
 import { nanoid } from 'nanoid'
 import { useStore } from '../store/useStore'
 import type { TaskTemplate, DeadlineRule } from '../types'
@@ -30,9 +30,6 @@ export function Templates() {
   const [editTemplate, setEditTemplate] = useState<TaskTemplate | undefined>()
   const [deleteId, setDeleteId] = useState<string | undefined>()
 
-  const system = templates.filter((t) => t.isSystemDefault)
-  const custom = templates.filter((t) => !t.isSystemDefault)
-
   return (
     <div className="px-6 py-8 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
@@ -43,44 +40,22 @@ export function Templates() {
         </Button>
       </div>
 
-      <div className="space-y-8">
-        <section>
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-3">
-            System Templates
-          </h2>
-          <div className="space-y-2">
-            {system.map((t) => (
-              <TemplateRow
-                key={t.id}
-                template={t}
-                readonly
-              />
-            ))}
-          </div>
-        </section>
-
-        <section>
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-3">
-            Custom Templates
-          </h2>
-          {custom.length === 0 ? (
-            <EmptyState
-              title="No custom templates"
-              description="Create your own compliance task templates."
+      <div className="space-y-2">
+        {templates.length === 0 ? (
+          <EmptyState
+            title="No templates"
+            description="Create your first compliance task template."
+          />
+        ) : (
+          templates.map((t) => (
+            <TemplateRow
+              key={t.id}
+              template={t}
+              onEdit={() => { setEditTemplate(t); setShowForm(true) }}
+              onDelete={() => setDeleteId(t.id)}
             />
-          ) : (
-            <div className="space-y-2">
-              {custom.map((t) => (
-                <TemplateRow
-                  key={t.id}
-                  template={t}
-                  onEdit={() => { setEditTemplate(t); setShowForm(true) }}
-                  onDelete={() => setDeleteId(t.id)}
-                />
-              ))}
-            </div>
-          )}
-        </section>
+          ))
+        )}
       </div>
 
       <Modal
@@ -114,12 +89,10 @@ export function Templates() {
 
 function TemplateRow({
   template,
-  readonly,
   onEdit,
   onDelete,
 }: {
   template: TaskTemplate
-  readonly?: boolean
   onEdit?: () => void
   onDelete?: () => void
 }) {
@@ -134,11 +107,6 @@ function TemplateRow({
         <p className="text-xs text-neutral-400 mt-0.5 truncate">{template.description}</p>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
-        {readonly && (
-          <span title="System template — read only">
-            <Lock size={13} className="text-neutral-300" />
-          </span>
-        )}
         <a
           href={template.governmentWebsite.url}
           target="_blank"
@@ -148,16 +116,12 @@ function TemplateRow({
         >
           <ExternalLink size={14} />
         </a>
-        {!readonly && (
-          <>
-            <button onClick={onEdit} className="text-neutral-400 hover:text-neutral-700">
-              <Edit size={14} />
-            </button>
-            <button onClick={onDelete} className="text-neutral-400 hover:text-neutral-900">
-              <Trash2 size={14} />
-            </button>
-          </>
-        )}
+        <button onClick={onEdit} className="text-neutral-400 hover:text-neutral-700">
+          <Edit size={14} />
+        </button>
+        <button onClick={onDelete} className="text-neutral-400 hover:text-neutral-900">
+          <Trash2 size={14} />
+        </button>
       </div>
     </div>
   )
