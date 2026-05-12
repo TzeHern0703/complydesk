@@ -109,7 +109,7 @@ export function Layout({ children }: LayoutProps) {
         </div>
 
         {/* Desktop top bar */}
-        <div className="hidden lg:flex items-center justify-end border-b border-neutral-200 bg-white px-6 py-2">
+        <div className="hidden lg:flex items-center justify-end border-b border-indigo-100 bg-indigo-50 px-6 py-2">
           <NotificationCenter />
         </div>
 

@@ -84,7 +84,7 @@ function DashboardPersonalRow({
           type="button"
           onClick={(e) => { e.stopPropagation(); onComplete(item) }}
           className={`flex-shrink-0 w-4 h-4 rounded border transition-colors ${
-            isDone ? 'bg-neutral-900 border-neutral-900' : 'border-neutral-300 hover:border-neutral-900'
+            isDone ? 'bg-indigo-600 border-indigo-600' : 'border-neutral-300 hover:border-indigo-500'
           }`}
           aria-label={isDone ? 'Mark incomplete' : 'Mark complete'}
         >

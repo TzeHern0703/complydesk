@@ -34,10 +34,10 @@ export function TaskSection({
         onClick={() => setCollapsed((v) => !v)}
         className="flex items-center gap-2 mb-3 w-full text-left"
       >
-        <span className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+        <span className="text-xs font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full">
           {title}
         </span>
-        <span className="text-xs text-neutral-400">({tasks.length})</span>
+        <span className="text-xs text-neutral-400 font-medium">{tasks.length}</span>
         <span className="ml-auto text-neutral-400">
           {collapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
         </span>

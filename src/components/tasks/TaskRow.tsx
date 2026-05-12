@@ -101,9 +101,17 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
     setEditingDeadline(false)
   }
 
+  const stripeBorder =
+    isCompleted || isSkipped ? 'border-l-4 border-l-neutral-200'
+    : isPostponed ? 'border-l-4 border-l-neutral-300'
+    : days < 0 ? 'border-l-4 border-l-red-400'
+    : days === 0 ? 'border-l-4 border-l-orange-400'
+    : days <= 7 ? 'border-l-4 border-l-amber-400'
+    : 'border-l-4 border-l-indigo-300'
+
   return (
     <div
-      className={`border border-neutral-200 rounded-xl bg-white shadow-sm transition-opacity ${
+      className={`border border-neutral-200 rounded-xl bg-white shadow-sm transition-opacity ${stripeBorder} ${
         isSkipped ? 'opacity-50' : isCompleted ? 'opacity-60' : ''
       }`}
     >
@@ -114,8 +122,8 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
           onClick={(e) => { e.stopPropagation(); toggle() }}
           className={`flex-shrink-0 w-4 h-4 rounded border transition-colors ${
             isCompleted
-              ? 'bg-neutral-900 border-neutral-900'
-              : 'border-neutral-300 hover:border-neutral-900'
+              ? 'bg-indigo-600 border-indigo-600'
+              : 'border-neutral-300 hover:border-indigo-500'
           }`}
           aria-label={isCompleted ? 'Mark incomplete' : 'Mark complete'}
         >
