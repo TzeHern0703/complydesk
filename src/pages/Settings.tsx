@@ -263,12 +263,12 @@ export function Settings() {
       <section className="space-y-4">
         <h2 className="text-sm font-medium text-neutral-900 border-b border-neutral-100 pb-2">Data Backup</h2>
         <p className="text-sm text-neutral-500">
-          Export all your data as a JSON file for backup. Import to restore from a previous backup.
+          Export all your data as an Excel file. Import to restore from a previous JSON backup.
         </p>
         <div className="flex flex-wrap gap-3">
           <Button variant="secondary" onClick={handleExport}>
             <Download size={14} />
-            Export data
+            Export to Excel
           </Button>
           <label className="inline-flex items-center gap-1.5 rounded border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition-colors cursor-pointer">
             <input type="file" accept=".json" onChange={handleImportFile} className="hidden" />
