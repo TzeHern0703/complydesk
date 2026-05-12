@@ -19,7 +19,7 @@ export function Sidebar({ overdueCount = 0, onClose }: SidebarProps) {
     <aside className="flex h-full w-56 flex-col border-r border-neutral-200 bg-white">
       <div className="flex items-center justify-between px-5 py-5">
         <div>
-          <span className="text-base font-semibold text-neutral-900">ComplyDesk</span>
+          <span className="text-base font-semibold text-indigo-600">ComplyDesk</span>
           <p className="text-xs text-neutral-400 mt-0.5">MY Compliance Tracker</p>
         </div>
         {onClose && (
@@ -57,17 +57,17 @@ function NavItem({ to, label, icon: Icon, end, badge, onClose }: NavItemProps) {
       end={end}
       onClick={onClose}
       className={({ isActive }) =>
-        `flex items-center gap-2.5 rounded px-3 py-2 text-sm transition-colors ${
+        `flex items-center gap-2.5 rounded px-3 py-2 text-sm transition-colors border-l-2 ${
           isActive
-            ? 'bg-neutral-100 text-neutral-900 font-medium'
-            : 'text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900'
+            ? 'border-indigo-500 bg-indigo-50 text-indigo-700 font-medium'
+            : 'border-transparent text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900'
         }`
       }
     >
       <Icon size={16} />
       <span className="flex-1">{label}</span>
       {badge != null && badge > 0 && (
-        <span className="min-w-[18px] h-[18px] rounded-full bg-neutral-900 text-white text-xs font-medium flex items-center justify-center px-1">
+        <span className="min-w-[18px] h-[18px] rounded-full bg-indigo-600 text-white text-xs font-medium flex items-center justify-center px-1">
           {badge > 99 ? '99+' : badge}
         </span>
       )}

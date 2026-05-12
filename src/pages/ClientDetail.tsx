@@ -151,7 +151,7 @@ export function ClientDetail() {
           <p className="text-sm font-medium text-neutral-700 mb-2">Custom Tasks</p>
           <div className="space-y-2">
             {clientCustomTaskList.map((ct) => (
-              <div key={ct.id} className="border border-neutral-200 rounded px-4 py-3 bg-white">
+              <div key={ct.id} className="border border-neutral-200 rounded-xl shadow-sm px-4 py-3 bg-white">
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <span className="text-sm font-medium text-neutral-900">{ct.name}</span>

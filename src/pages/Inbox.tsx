@@ -223,7 +223,7 @@ function EmailRow({
   const clientName = clients.find((c) => c.id === msg.clientId)?.name
 
   return (
-    <div className={`border border-neutral-200 rounded bg-white ${msg.isProcessed ? 'opacity-60' : ''}`}>
+    <div className={`border border-neutral-200 rounded-xl shadow-sm bg-white ${msg.isProcessed ? 'opacity-60' : ''}`}>
       <div className="flex items-center gap-3 px-4 py-3">
         {/* Processed checkbox */}
         <button

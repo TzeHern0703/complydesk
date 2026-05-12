@@ -103,7 +103,7 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
 
   return (
     <div
-      className={`border border-neutral-200 rounded bg-white transition-opacity ${
+      className={`border border-neutral-200 rounded-xl bg-white shadow-sm transition-opacity ${
         isSkipped ? 'opacity-50' : isCompleted ? 'opacity-60' : ''
       }`}
     >

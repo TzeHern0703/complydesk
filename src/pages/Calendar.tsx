@@ -48,7 +48,7 @@ export function Calendar() {
         </div>
       </div>
 
-      <div className="bg-white border border-neutral-200 rounded overflow-hidden">
+      <div className="bg-white border border-neutral-200 rounded-xl shadow-sm overflow-hidden">
         <div className="grid grid-cols-7 border-b border-neutral-100">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
             <div key={d} className="py-2 text-center text-xs font-medium text-neutral-400">{d}</div>

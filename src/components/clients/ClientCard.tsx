@@ -16,7 +16,7 @@ export function ClientCard({ client, tasks }: ClientCardProps) {
   return (
     <button
       onClick={() => navigate(`/clients/${client.id}`)}
-      className="w-full text-left bg-white border border-neutral-200 rounded p-4 hover:border-neutral-400 transition-colors flex items-center gap-4"
+      className="w-full text-left bg-white border border-neutral-200 rounded-xl shadow-sm p-4 hover:border-indigo-300 hover:shadow-md transition-all flex items-center gap-4"
     >
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
@@ -25,8 +25,8 @@ export function ClientCard({ client, tasks }: ClientCardProps) {
             <span className="text-xs text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded">Inactive</span>
           )}
           {overdue > 0 && (
-            <span className="text-xs font-semibold text-neutral-900 flex items-center gap-1">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-neutral-900" />
+            <span className="text-xs font-semibold text-red-600 flex items-center gap-1">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500" />
               {overdue} overdue
             </span>
           )}

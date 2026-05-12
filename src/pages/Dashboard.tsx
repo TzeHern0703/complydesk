@@ -78,7 +78,7 @@ function DashboardPersonalRow({
   const isOv = item.deadline < new Date(new Date().setHours(0, 0, 0, 0))
 
   return (
-    <div className={`border border-neutral-200 rounded bg-white transition-opacity ${isDone ? 'opacity-60' : ''}`}>
+    <div className={`border border-neutral-200 rounded-xl shadow-sm bg-white transition-opacity ${isDone ? 'opacity-60' : ''}`}>
       <div className="flex items-center gap-3 px-4 py-3">
         <button
           type="button"
@@ -372,7 +372,7 @@ export function Dashboard() {
         <NotificationPermissionCard onDismiss={() => setPermissionCardDismissed(true)} />
       )}
 
-      <div className="bg-white border border-neutral-200 rounded p-4">
+      <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-4">
         <ProgressBar
           value={completedThisMonth.length}
           max={monthTasks.length}
@@ -536,7 +536,7 @@ function UnprocessedEmailWidget() {
   return (
     <button
       onClick={() => navigate('/inbox?filter=unprocessed')}
-      className="w-full text-left bg-white border border-neutral-200 rounded p-4 hover:border-neutral-400 transition-colors flex items-center justify-between"
+      className="w-full text-left bg-white border border-neutral-200 rounded-xl shadow-sm p-4 hover:border-indigo-300 hover:shadow-md transition-all flex items-center justify-between"
     >
       <div>
         <p className="text-sm font-medium text-neutral-900">

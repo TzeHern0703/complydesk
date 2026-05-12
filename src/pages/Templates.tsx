@@ -97,7 +97,7 @@ function TemplateRow({
   onDelete?: () => void
 }) {
   return (
-    <div className="bg-white border border-neutral-200 rounded px-4 py-3 flex items-center gap-3">
+    <div className="bg-white border border-neutral-200 rounded-xl shadow-sm px-4 py-3 flex items-center gap-3">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm font-medium text-neutral-900">{template.name}</span>

@@ -15,7 +15,13 @@
       "Bash(git config *)",
       "Bash(git commit *)",
       "Bash(curl -s https://api.github.com/users/TzeHern0703)",
-      "Bash(npm info *)"
+      "Bash(npm info *)",
+      "Bash(git -C /Users/tzehern/Desktop/accounting status)",
+      "Bash(git -C /Users/tzehern/Desktop/accounting diff)",
+      "Bash(git *)",
+      "Bash(npx vercel *)",
+      "Bash(npm audit *)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); [print\\(k, v.get\\('severity',''\\), v.get\\('title',''\\)\\) for k,v in d.get\\('vulnerabilities',{}\\).items\\(\\)]\")"
     ]
   }
 }

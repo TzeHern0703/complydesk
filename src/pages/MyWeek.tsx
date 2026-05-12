@@ -222,7 +222,7 @@ function PersonalTaskRow({
     !done
 
   return (
-    <div className={`border border-neutral-200 rounded bg-white ${done ? 'opacity-60' : ''}`}>
+    <div className={`border border-neutral-200 rounded-xl shadow-sm bg-white ${done ? 'opacity-60' : ''}`}>
       <div className="flex items-center gap-3 px-4 py-3">
         <button
           onClick={onToggle}
@@ -300,7 +300,7 @@ function RecurringInstanceRow({
   const pattern = (task.recurringWeekdays ?? []).map((d) => WEEKDAY_LABELS[d]).join(', ')
 
   return (
-    <div className={`border border-neutral-200 rounded bg-white ${done ? 'opacity-60' : ''}`}>
+    <div className={`border border-neutral-200 rounded-xl shadow-sm bg-white ${done ? 'opacity-60' : ''}`}>
       <div className="flex items-center gap-3 px-4 py-3">
         <button
           onClick={onToggle}
