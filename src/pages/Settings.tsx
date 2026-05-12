@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Download, Upload, Lock, Unlock, Plus, X, Wifi, Bell } from 'lucide-react'
+import * as XLSX from 'xlsx'
 import { nanoid } from 'nanoid'
 import { useStore } from '../store/useStore'
 import { Button } from '../components/ui/Button'
@@ -71,13 +72,20 @@ export function Settings() {
 
   async function handleExport() {
     const data = await q.exportData()
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `complydesk-backup-${new Date().toISOString().split('T')[0]}.json`
-    a.click()
-    URL.revokeObjectURL(url)
+    const wb = XLSX.utils.book_new()
+    const sheets: [string, unknown[]][] = [
+      ['Clients', data.clients],
+      ['Tasks', data.tasks],
+      ['Templates', data.taskTemplates],
+      ['Assignments', data.assignments],
+      ['PersonalTasks', data.personalTasks],
+      ['TaskHistory', data.taskHistory],
+      ['RecurringInstances', data.recurringInstances],
+    ]
+    for (const [name, rows] of sheets) {
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), name)
+    }
+    XLSX.writeFile(wb, `complydesk-export-${new Date().toISOString().split('T')[0]}.xlsx`)
   }
 
   function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
