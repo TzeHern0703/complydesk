@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Download, FileText, Image, Eye } from 'lucide-react'
 import type { EmailAttachment } from '../../types'
 import { fetchAttachmentData } from '../../lib/gmail'
@@ -15,6 +15,12 @@ export function AttachmentItem({ attachment, token }: AttachmentViewerProps) {
 
   const isPDF = attachment.mimeType === 'application/pdf'
   const isImage = attachment.mimeType.startsWith('image/')
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
+    }
+  }, [previewUrl])
 
   async function getBase64(): Promise<string> {
     if (attachment.data) return attachment.data
@@ -43,6 +49,7 @@ export function AttachmentItem({ attachment, token }: AttachmentViewerProps) {
 
   async function handlePreview() {
     if (previewUrl) {
+      URL.revokeObjectURL(previewUrl)
       setPreviewUrl(null)
       return
     }

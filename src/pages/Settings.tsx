@@ -140,21 +140,29 @@ export function Settings() {
     }
     setGmailConnecting(true)
     setGmailStatus('')
+    // Safety timeout: reset if the popup is dismissed without a response
+    const timeout = setTimeout(() => {
+      setGmailConnecting(false)
+      setGmailStatus('Auth window closed or timed out. Try again.')
+    }, 120_000)
     try {
       await updateSettings({ gmailClientId: gmailClientId.trim() })
       await requestGmailToken(
         gmailClientId.trim(),
         async (token, expiry) => {
+          clearTimeout(timeout)
           await updateSettings({ gmailAccessToken: token, gmailTokenExpiry: expiry })
           setGmailStatus('Connected! Token valid for ~1 hour.')
           setGmailConnecting(false)
         },
         (err) => {
+          clearTimeout(timeout)
           setGmailStatus(`Auth failed: ${err}`)
           setGmailConnecting(false)
         }
       )
     } catch (e: any) {
+      clearTimeout(timeout)
       setGmailStatus(e.message)
       setGmailConnecting(false)
     }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { RefreshCw, Paperclip, ChevronDown, ChevronUp, Tag } from 'lucide-react'
 import DOMPurify from 'dompurify'
 import JSZip from 'jszip'
@@ -16,6 +16,7 @@ import { fetchAttachmentData } from '../lib/gmail'
 type FilterTab = 'all' | 'unprocessed' | 'attachments'
 
 export function Inbox() {
+  const navigate = useNavigate()
   const { settings, emailMessages, saveEmailMessages, updateEmailProcessed, updateEmailClient, clients } = useStore()
   const [searchParams] = useSearchParams()
   const [activeTab, setActiveTab] = useState<FilterTab>(
@@ -115,7 +116,7 @@ export function Inbox() {
           title="Gmail not configured"
           description="Connect your Gmail account in Settings to use the Inbox."
           action={
-            <Button variant="primary" onClick={() => (window.location.hash = '#/settings')}>
+            <Button variant="primary" onClick={() => navigate('/settings')}>
               Go to Settings
             </Button>
           }
