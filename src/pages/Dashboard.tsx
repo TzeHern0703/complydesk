@@ -12,6 +12,7 @@ import { getWeekStart, weekStartToString, formatTime12h } from '../lib/weekUtils
 import { supportsNotifications, getNotificationPermission, formatTodayDate } from '../lib/notificationUtils'
 import { toVirtualTemplate } from '../lib/taskGenerator'
 import type { Task, Client, TaskTemplate, PersonalTask, RecurringWeeklyInstance } from '../types'
+import { playCompleteSound } from '../lib/sounds'
 
 // ── Unified task item for mixed sections ──────────────────────────────────────
 
@@ -343,9 +344,11 @@ export function Dashboard() {
   async function handlePersonalComplete(item: DashboardItem) {
     if (item.recurringInstance) {
       const newStatus = item.recurringInstance.status === 'completed' ? 'pending' : 'completed'
+      if (newStatus === 'completed') playCompleteSound()
       await updateRecurringInstanceStatus(item.recurringInstance.id, newStatus)
     } else if (item.personalTask) {
       const newStatus = item.personalTask.status === 'completed' ? 'pending' : 'completed'
+      if (newStatus === 'completed') playCompleteSound()
       await updatePersonalTaskStatus(item.personalTask.id, newStatus)
     }
   }
@@ -482,7 +485,7 @@ function MyWeekWidget() {
         <button
           type="button"
           onClick={() => navigate('/my-week')}
-          className="text-xs text-neutral-400 dark:text-zinc-500 hover:text-neutral-900 dark:hover:text-white underline underline-offset-2"
+          className="text-xs text-neutral-400 dark:text-zinc-500 hover:text-neutral-900 dark:hover:text-purple-300 underline underline-offset-2"
         >
           Open My Week →
         </button>

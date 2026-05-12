@@ -7,6 +7,7 @@ import { Button } from '../ui/Button'
 import { useStore } from '../../store/useStore'
 import { Textarea } from '../ui/Input'
 import { format } from 'date-fns'
+import { playCompleteSound } from '../../lib/sounds'
 
 const WEEKDAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -84,6 +85,7 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
       setShowNextDeadline(true)
       return
     }
+    if (!isCompleted) playCompleteSound()
     await updateTaskStatus(task.id, isCompleted ? 'pending' : 'completed')
   }
 
@@ -178,7 +180,7 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
               href={template.governmentWebsite.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-neutral-300 hover:text-neutral-900 dark:text-zinc-600 dark:hover:text-white transition-colors"
+              className="text-neutral-300 hover:text-neutral-900 dark:text-zinc-600 dark:hover:text-purple-300 transition-colors"
               title={loginUsername ? `Copy username & open ${template.governmentWebsite.name}` : `Open ${template.governmentWebsite.name}`}
               onClick={(e) => handleWebsiteClick(template.governmentWebsite.url, e)}
             >
@@ -208,7 +210,7 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
                   href={template.governmentWebsite.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-neutral-700 dark:text-zinc-300 hover:text-neutral-900 dark:hover:text-white underline underline-offset-2"
+                  className="inline-flex items-center gap-1 text-xs text-neutral-700 dark:text-zinc-300 hover:text-neutral-900 dark:hover:text-purple-300 underline underline-offset-2"
                   onClick={(e) => handleWebsiteClick(template.governmentWebsite.url, e)}
                 >
                   <ExternalLink size={11} />
@@ -220,7 +222,7 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
                   href={template.governmentWebsite.loginUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-neutral-700 dark:text-zinc-300 hover:text-neutral-900 dark:hover:text-white underline underline-offset-2"
+                  className="inline-flex items-center gap-1 text-xs text-neutral-700 dark:text-zinc-300 hover:text-neutral-900 dark:hover:text-purple-300 underline underline-offset-2"
                   onClick={(e) => handleWebsiteClick(template.governmentWebsite.loginUrl!, e)}
                 >
                   <ExternalLink size={11} />
@@ -349,6 +351,7 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
                 variant="primary"
                 onClick={async () => {
                   if (!nextDeadlineInput) return
+                  playCompleteSound()
                   await completeManualTask(task.id, nextDeadlineInput, nextLeadTime)
                   setShowNextDeadline(false)
                 }}

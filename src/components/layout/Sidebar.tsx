@@ -23,7 +23,7 @@ export function Sidebar({ overdueCount = 0, onClose }: SidebarProps) {
           <p className="text-xs text-neutral-400 dark:text-zinc-400 mt-0.5">MY Compliance Tracker</p>
         </div>
         {onClose && (
-          <button onClick={onClose} className="text-neutral-400 hover:text-neutral-700 dark:text-zinc-400 dark:hover:text-white lg:hidden">
+          <button onClick={onClose} className="text-neutral-400 hover:text-neutral-700 dark:text-zinc-400 dark:hover:text-purple-300 lg:hidden">
             <X size={18} />
           </button>
         )}
@@ -60,7 +60,7 @@ function NavItem({ to, label, icon: Icon, end, badge, onClose }: NavItemProps) {
         `flex items-center gap-2.5 rounded px-3 py-2 text-sm transition-colors border-l-2 ${
           isActive
             ? 'border-indigo-500 bg-indigo-50 text-indigo-700 font-medium dark:border-purple-500 dark:bg-purple-900/40 dark:text-white'
-            : 'border-transparent text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white'
+            : 'border-transparent text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-purple-300'
         }`
       }
     >

@@ -28,17 +28,17 @@ export function NotificationPermissionCard({ onDismiss }: NotificationPermission
   }
 
   return (
-    <div className="border border-neutral-200 rounded bg-white p-4 space-y-3">
+    <div className="border border-neutral-200 dark:border-zinc-700 rounded bg-white dark:bg-zinc-900 p-4 space-y-3">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
-          <Bell size={15} className="text-neutral-500 flex-shrink-0 mt-0.5" />
-          <p className="text-sm font-medium text-neutral-900">Get deadline reminders</p>
+          <Bell size={15} className="text-neutral-500 dark:text-zinc-400 flex-shrink-0 mt-0.5" />
+          <p className="text-sm font-medium text-neutral-900 dark:text-white">Get deadline reminders</p>
         </div>
-        <button onClick={handleLater} className="text-neutral-300 hover:text-neutral-600">
+        <button onClick={handleLater} className="text-neutral-300 hover:text-neutral-600 dark:text-zinc-600 dark:hover:text-zinc-300">
           <X size={14} />
         </button>
       </div>
-      <p className="text-sm text-neutral-500">
+      <p className="text-sm text-neutral-500 dark:text-zinc-400">
         Enable browser notifications to get alerts when tasks are due — even when you're working in another tab.
       </p>
       <div className="flex gap-2">
@@ -49,7 +49,7 @@ export function NotificationPermissionCard({ onDismiss }: NotificationPermission
           Enable notifications
         </Button>
       </div>
-      <p className="text-xs text-neutral-400">
+      <p className="text-xs text-neutral-400 dark:text-zinc-500">
         Notifications are generated locally in your browser. No data is sent to any server.
       </p>
     </div>

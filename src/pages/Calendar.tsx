@@ -36,13 +36,13 @@ export function Calendar() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-lg font-medium text-neutral-900 dark:text-white">Calendar</h1>
         <div className="flex items-center gap-3">
-          <button onClick={() => setCurrentMonth((m) => subMonths(m, 1))} className="text-neutral-400 dark:text-zinc-500 hover:text-neutral-700 dark:hover:text-white">
+          <button onClick={() => setCurrentMonth((m) => subMonths(m, 1))} className="text-neutral-400 dark:text-zinc-500 hover:text-neutral-700 dark:hover:text-purple-300">
             <ChevronLeft size={18} />
           </button>
           <span className="text-sm font-medium text-neutral-700 dark:text-zinc-300 min-w-[120px] text-center">
             {format(currentMonth, 'MMMM yyyy')}
           </span>
-          <button onClick={() => setCurrentMonth((m) => addMonths(m, 1))} className="text-neutral-400 dark:text-zinc-500 hover:text-neutral-700 dark:hover:text-white">
+          <button onClick={() => setCurrentMonth((m) => addMonths(m, 1))} className="text-neutral-400 dark:text-zinc-500 hover:text-neutral-700 dark:hover:text-purple-300">
             <ChevronRight size={18} />
           </button>
         </div>

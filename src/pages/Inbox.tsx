@@ -160,7 +160,7 @@ export function Inbox() {
               className={`px-3 py-1.5 text-xs rounded transition-colors ${
                 activeTab === tab
                   ? 'bg-neutral-900 dark:bg-purple-600 text-white'
-                  : 'text-neutral-500 dark:text-zinc-400 hover:text-neutral-900 dark:hover:text-white'
+                  : 'text-neutral-500 dark:text-zinc-400 hover:text-neutral-900 dark:hover:text-purple-300'
               }`}
             >
               {tab === 'all' ? 'All' : tab === 'unprocessed' ? 'Unprocessed' : 'Attachments'}

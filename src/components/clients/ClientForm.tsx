@@ -124,9 +124,9 @@ function CustomTaskModal({ initial, clientId, onSave, onCancel }: CustomTaskModa
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
-      <div className="relative bg-white border border-neutral-200 rounded-xl p-6 w-full max-w-lg space-y-5 shadow-lg overflow-y-auto max-h-[90vh]">
-        <h2 className="text-base font-medium text-neutral-900">
+      <div className="absolute inset-0 bg-black/40 dark:bg-black/70" onClick={onCancel} />
+      <div className="relative bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700 rounded-xl p-6 w-full max-w-lg space-y-5 shadow-lg overflow-y-auto max-h-[90vh]">
+        <h2 className="text-base font-medium text-neutral-900 dark:text-white">
           {initial ? 'Edit Custom Task' : 'Add Custom Task'}
         </h2>
 
@@ -141,11 +141,11 @@ function CustomTaskModal({ initial, clientId, onSave, onCancel }: CustomTaskModa
 
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-neutral-700">Frequency *</label>
+            <label className="text-sm font-medium text-neutral-700 dark:text-zinc-300">Frequency *</label>
             <select
               value={category}
               onChange={(e) => handleCategoryChange(e.target.value as ClientCustomTask['category'])}
-              className="rounded border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-neutral-900 focus:outline-none"
+              className="rounded border border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-neutral-900 dark:text-white focus:border-neutral-900 dark:focus:border-zinc-400 focus:outline-none"
             >
               <option value="monthly">Monthly</option>
               <option value="bi-monthly">Bi-Monthly</option>
@@ -159,11 +159,11 @@ function CustomTaskModal({ initial, clientId, onSave, onCancel }: CustomTaskModa
 
           {showDayOfMonth && (
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-neutral-700">Day of month</label>
+              <label className="text-sm font-medium text-neutral-700 dark:text-zinc-300">Day of month</label>
               <select
                 value={dayOfMonth}
                 onChange={(e) => setDayOfMonth(e.target.value)}
-                className="rounded border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-neutral-900 focus:outline-none"
+                className="rounded border border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-neutral-900 dark:text-white focus:border-neutral-900 dark:focus:border-zinc-400 focus:outline-none"
               >
                 {Array.from({ length: 28 }, (_, i) => i + 1).map((d) => (
                   <option key={d} value={d}>{d}</option>
@@ -177,11 +177,11 @@ function CustomTaskModal({ initial, clientId, onSave, onCancel }: CustomTaskModa
         {category === 'yearly' && (
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-neutral-700">Month</label>
+              <label className="text-sm font-medium text-neutral-700 dark:text-zinc-300">Month</label>
               <select
                 value={yearlyMonth}
                 onChange={(e) => setYearlyMonth(e.target.value)}
-                className="rounded border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-neutral-900 focus:outline-none"
+                className="rounded border border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-neutral-900 dark:text-white focus:border-neutral-900 dark:focus:border-zinc-400 focus:outline-none"
               >
                 {MONTHS.map((m, i) => (
                   <option key={i + 1} value={i + 1}>{m}</option>
@@ -210,7 +210,7 @@ function CustomTaskModal({ initial, clientId, onSave, onCancel }: CustomTaskModa
 
         {showMonthPicker && (
           <div>
-            <p className="text-sm font-medium text-neutral-700 mb-2">Applicable months</p>
+            <p className="text-sm font-medium text-neutral-700 dark:text-zinc-300 mb-2">Applicable months</p>
             <div className="flex flex-wrap gap-2">
               {MONTHS.map((m, i) => (
                 <button
@@ -219,21 +219,21 @@ function CustomTaskModal({ initial, clientId, onSave, onCancel }: CustomTaskModa
                   onClick={() => toggleMonth(i + 1)}
                   className={`px-2.5 py-1 rounded text-xs border transition-colors ${
                     selectedMonths.includes(i + 1)
-                      ? 'bg-neutral-900 text-white border-neutral-900'
-                      : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-400'
+                      ? 'bg-neutral-900 dark:bg-purple-700 text-white border-neutral-900 dark:border-purple-700'
+                      : 'bg-white dark:bg-zinc-800 text-neutral-600 dark:text-zinc-300 border-neutral-200 dark:border-zinc-600 hover:border-neutral-400 hover:text-neutral-900 dark:hover:border-purple-500 dark:hover:text-purple-300'
                   }`}
                 >
                   {m}
                 </button>
               ))}
             </div>
-            <p className="text-xs text-neutral-400 mt-1">Leave blank to apply every period</p>
+            <p className="text-xs text-neutral-400 dark:text-zinc-500 mt-1">Leave blank to apply every period</p>
           </div>
         )}
 
         {showWeekdayPicker && (
           <div>
-            <p className="text-sm font-medium text-neutral-700 mb-2">Days of week *</p>
+            <p className="text-sm font-medium text-neutral-700 dark:text-zinc-300 mb-2">Days of week *</p>
             <div className="flex flex-wrap gap-2">
               {WEEKDAY_SHORT.map((day, i) => (
                 <button
@@ -242,8 +242,8 @@ function CustomTaskModal({ initial, clientId, onSave, onCancel }: CustomTaskModa
                   onClick={() => toggleWeekday(i)}
                   className={`px-2.5 py-1 rounded text-xs border transition-colors ${
                     selectedWeekdays.includes(i)
-                      ? 'bg-neutral-900 text-white border-neutral-900'
-                      : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-400'
+                      ? 'bg-neutral-900 dark:bg-purple-700 text-white border-neutral-900 dark:border-purple-700'
+                      : 'bg-white dark:bg-zinc-800 text-neutral-600 dark:text-zinc-300 border-neutral-200 dark:border-zinc-600 hover:border-neutral-400 hover:text-neutral-900 dark:hover:border-purple-500 dark:hover:text-purple-300'
                   }`}
                 >
                   {day}
@@ -254,16 +254,16 @@ function CustomTaskModal({ initial, clientId, onSave, onCancel }: CustomTaskModa
         )}
 
         <div className="space-y-1">
-          <p className="text-sm font-medium text-neutral-700">Deadline mode</p>
+          <p className="text-sm font-medium text-neutral-700 dark:text-zinc-300">Deadline mode</p>
           <div className="flex gap-4">
             {(['auto', 'manual'] as const).map((mode) => (
-              <label key={mode} className="flex items-center gap-1.5 text-sm text-neutral-700 cursor-pointer">
+              <label key={mode} className="flex items-center gap-1.5 text-sm text-neutral-700 dark:text-zinc-300 cursor-pointer">
                 <input
                   type="radio"
                   name="ct-deadline-mode"
                   checked={deadlineMode === mode}
                   onChange={() => setDeadlineMode(mode)}
-                  className="accent-neutral-900"
+                  className="accent-neutral-900 dark:accent-purple-500"
                 />
                 {mode === 'auto' ? 'Auto (from frequency)' : 'Manual (I set the next deadline)'}
               </label>
@@ -280,20 +280,20 @@ function CustomTaskModal({ initial, clientId, onSave, onCancel }: CustomTaskModa
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-sm text-neutral-700 flex-shrink-0">Show in dashboard:</span>
+          <span className="text-sm text-neutral-700 dark:text-zinc-300 flex-shrink-0">Show in dashboard:</span>
           <input
             type="number"
             min={0}
             max={3650}
             value={leadTimeDays}
             onChange={(e) => setLeadTimeDays(Number(e.target.value))}
-            className="w-20 rounded border border-neutral-200 px-2 py-1 text-sm focus:border-neutral-900 focus:outline-none"
+            className="w-20 rounded border border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-neutral-900 dark:text-white px-2 py-1 text-sm focus:border-neutral-900 dark:focus:border-zinc-400 focus:outline-none"
           />
-          <span className="text-xs text-neutral-400">days before deadline</span>
+          <span className="text-xs text-neutral-400 dark:text-zinc-500">days before deadline</span>
         </div>
 
-        <div className="border-t border-neutral-100 pt-4 space-y-3">
-          <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wide">Optional</p>
+        <div className="border-t border-neutral-100 dark:border-zinc-700 pt-4 space-y-3">
+          <p className="text-xs font-semibold text-neutral-400 dark:text-zinc-500 uppercase tracking-wide">Optional</p>
           <div className="grid grid-cols-2 gap-3">
             <Input label="Website name" value={websiteName} onChange={(e) => setWebsiteName(e.target.value)} placeholder="e.g. LHDN" />
             <Input label="Website URL" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} placeholder="https://..." />
@@ -484,23 +484,23 @@ export function ClientForm({ client, assignments, onSave, onCancel, renderFooter
         rows={2}
       />
 
-      <label className="flex items-center gap-2 text-sm text-neutral-700 cursor-pointer">
+      <label className="flex items-center gap-2 text-sm text-neutral-700 dark:text-zinc-300 cursor-pointer">
         <input
           type="checkbox"
           checked={isActive}
           onChange={(e) => setIsActive(e.target.checked)}
-          className="accent-neutral-900"
+          className="accent-neutral-900 dark:accent-purple-500"
         />
         Active client
       </label>
 
       <div>
-        <p className="text-sm font-medium text-neutral-700 mb-2">Compliance Tasks</p>
+        <p className="text-sm font-medium text-neutral-700 dark:text-zinc-300 mb-2">Compliance Tasks</p>
         <div className="space-y-4">
           {(Object.keys(grouped) as Array<keyof typeof grouped>).map((cat) => (
             grouped[cat].length > 0 && (
               <div key={cat}>
-                <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wide mb-1.5">
+                <p className="text-xs font-semibold text-neutral-400 dark:text-zinc-500 uppercase tracking-wide mb-1.5">
                   {categoryLabels[cat]}
                 </p>
                 <div className="space-y-2">
@@ -512,7 +512,7 @@ export function ClientForm({ client, assignments, onSave, onCancel, renderFooter
                     const currentLeadTime = leadTimeDaysMap[t.id] ?? getDefaultLeadTime(t.category)
                     return (
                       <div key={t.id}>
-                        <label className="flex items-start gap-2 text-sm text-neutral-700 cursor-pointer">
+                        <label className="flex items-start gap-2 text-sm text-neutral-700 dark:text-zinc-300 cursor-pointer">
                           <input
                             type="checkbox"
                             checked={isSelected}
@@ -521,7 +521,7 @@ export function ClientForm({ client, assignments, onSave, onCancel, renderFooter
                           />
                           <div>
                             <span>{t.name}</span>
-                            {t.nameZh && <span className="ml-1 text-xs text-neutral-400">{t.nameZh}</span>}
+                            {t.nameZh && <span className="ml-1 text-xs text-neutral-400 dark:text-zinc-500">{t.nameZh}</span>}
                           </div>
                         </label>
 
@@ -544,13 +544,13 @@ export function ClientForm({ client, assignments, onSave, onCancel, renderFooter
                               <div className="space-y-2">
                                 <div className="flex gap-4">
                                   {(['auto', 'manual'] as const).map((mode) => (
-                                    <label key={mode} className="flex items-center gap-1.5 text-xs text-neutral-700 cursor-pointer">
+                                    <label key={mode} className="flex items-center gap-1.5 text-xs text-neutral-700 dark:text-zinc-300 cursor-pointer">
                                       <input
                                         type="radio"
                                         name={`mode-${t.id}`}
                                         checked={currentMode === mode}
                                         onChange={() => setDeadlineModes((prev) => ({ ...prev, [t.id]: mode }))}
-                                        className="accent-neutral-900"
+                                        className="accent-neutral-900 dark:accent-purple-500"
                                       />
                                       {mode === 'auto' ? 'Auto (from template)' : 'Manual deadline'}
                                     </label>
@@ -569,7 +569,7 @@ export function ClientForm({ client, assignments, onSave, onCancel, renderFooter
                                 )}
 
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xs text-neutral-500">Show in dashboard:</span>
+                                  <span className="text-xs text-neutral-500 dark:text-zinc-400">Show in dashboard:</span>
                                   <input
                                     type="number"
                                     min={0}
@@ -578,9 +578,9 @@ export function ClientForm({ client, assignments, onSave, onCancel, renderFooter
                                     onChange={(e) =>
                                       setLeadTimeDaysMap((prev) => ({ ...prev, [t.id]: Number(e.target.value) }))
                                     }
-                                    className="w-20 rounded border border-neutral-200 px-2 py-1 text-xs focus:border-neutral-900 focus:outline-none"
+                                    className="w-20 rounded border border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-neutral-900 dark:text-white px-2 py-1 text-xs focus:border-neutral-900 dark:focus:border-zinc-400 focus:outline-none"
                                   />
-                                  <span className="text-xs text-neutral-400">days before deadline</span>
+                                  <span className="text-xs text-neutral-400 dark:text-zinc-500">days before deadline</span>
                                 </div>
                               </div>
                             )}
@@ -588,7 +588,7 @@ export function ClientForm({ client, assignments, onSave, onCancel, renderFooter
                             {/* Login username */}
                             <div className="space-y-1.5 pt-1">
                               <div className="flex items-center gap-2">
-                                <span className="text-xs text-neutral-500 w-28 flex-shrink-0">Login username:</span>
+                                <span className="text-xs text-neutral-500 dark:text-zinc-400 w-28 flex-shrink-0">Login username:</span>
                                 <input
                                   type="text"
                                   value={loginUsernames[t.id] ?? ''}
@@ -596,11 +596,11 @@ export function ClientForm({ client, assignments, onSave, onCancel, renderFooter
                                     setLoginUsernames((prev) => ({ ...prev, [t.id]: e.target.value }))
                                   }
                                   placeholder="e.g. ACME_EPF_2020"
-                                  className="flex-1 rounded border border-neutral-200 px-2 py-1 text-xs focus:border-neutral-900 focus:outline-none"
+                                  className="flex-1 rounded border border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-zinc-600 px-2 py-1 text-xs focus:border-neutral-900 dark:focus:border-zinc-400 focus:outline-none"
                                 />
                               </div>
                               <div className="flex items-center gap-2">
-                                <span className="text-xs text-neutral-500 w-28 flex-shrink-0">Login notes:</span>
+                                <span className="text-xs text-neutral-500 dark:text-zinc-400 w-28 flex-shrink-0">Login notes:</span>
                                 <input
                                   type="text"
                                   value={loginNotesMap[t.id] ?? ''}
@@ -608,7 +608,7 @@ export function ClientForm({ client, assignments, onSave, onCancel, renderFooter
                                     setLoginNotesMap((prev) => ({ ...prev, [t.id]: e.target.value }))
                                   }
                                   placeholder="e.g. use old phone for OTP"
-                                  className="flex-1 rounded border border-neutral-200 px-2 py-1 text-xs focus:border-neutral-900 focus:outline-none"
+                                  className="flex-1 rounded border border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-zinc-600 px-2 py-1 text-xs focus:border-neutral-900 dark:focus:border-zinc-400 focus:outline-none"
                                 />
                               </div>
                             </div>
@@ -627,34 +627,34 @@ export function ClientForm({ client, assignments, onSave, onCancel, renderFooter
       {/* Custom Tasks */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <p className="text-sm font-medium text-neutral-700">Custom Tasks</p>
+          <p className="text-sm font-medium text-neutral-700 dark:text-zinc-300">Custom Tasks</p>
           <button
             type="button"
             onClick={() => { setEditingCustomTask(null); setShowCustomModal(true) }}
-            className="text-xs font-medium text-neutral-700 hover:text-neutral-900 underline underline-offset-2"
+            className="text-xs font-medium text-neutral-700 dark:text-zinc-300 hover:text-neutral-900 dark:hover:text-purple-300 underline underline-offset-2"
           >
             + Add Custom
           </button>
         </div>
         {customTasks.length === 0 && (
-          <p className="text-xs text-neutral-400">No custom tasks yet.</p>
+          <p className="text-xs text-neutral-400 dark:text-zinc-500">No custom tasks yet.</p>
         )}
         <div className="space-y-2">
           {customTasks.map((ct) => (
-            <div key={ct.id} className="border border-neutral-200 rounded px-3 py-2.5 bg-white">
+            <div key={ct.id} className="border border-neutral-200 dark:border-zinc-700 rounded px-3 py-2.5 bg-white dark:bg-zinc-800">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <span className="text-sm font-medium text-neutral-900">{ct.name}</span>
-                  <span className="ml-2 text-xs text-neutral-400">
+                  <span className="text-sm font-medium text-neutral-900 dark:text-white">{ct.name}</span>
+                  <span className="ml-2 text-xs text-neutral-400 dark:text-zinc-500">
                     {categoryLabels[ct.category] ?? ct.category}
                     {ct.deadlineMode === 'manual' && ct.manualDeadline ? ` · Manual · ${ct.manualDeadline}` : ''}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <button type="button" onClick={() => { setEditingCustomTask(ct); setShowCustomModal(true) }}
-                    className="text-xs text-neutral-400 hover:text-neutral-700">Edit</button>
+                    className="text-xs text-neutral-400 hover:text-neutral-700 dark:text-zinc-500 dark:hover:text-zinc-200">Edit</button>
                   <button type="button" onClick={() => setConfirmDeleteCustom(ct.id)}
-                    className="text-xs text-neutral-400 hover:text-red-600">Delete</button>
+                    className="text-xs text-neutral-400 hover:text-red-600 dark:text-zinc-500 dark:hover:text-red-400">Delete</button>
                 </div>
               </div>
             </div>
@@ -691,9 +691,9 @@ export function ClientForm({ client, assignments, onSave, onCancel, renderFooter
       {confirmDeleteCustom && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmDeleteCustom(null)} />
-          <div className="relative bg-white border border-neutral-200 rounded-xl p-6 w-full max-w-sm shadow-lg space-y-4">
-            <h2 className="text-base font-medium text-neutral-900">Delete custom task?</h2>
-            <p className="text-sm text-neutral-500">Pending tasks will be removed. Completed tasks are preserved in history.</p>
+          <div className="relative bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700 rounded-xl p-6 w-full max-w-sm shadow-lg space-y-4">
+            <h2 className="text-base font-medium text-neutral-900 dark:text-white">Delete custom task?</h2>
+            <p className="text-sm text-neutral-500 dark:text-zinc-400">Pending tasks will be removed. Completed tasks are preserved in history.</p>
             <div className="flex justify-end gap-2">
               <Button variant="ghost" onClick={() => setConfirmDeleteCustom(null)}>Cancel</Button>
               <Button variant="danger" onClick={() => {

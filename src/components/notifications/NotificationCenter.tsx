@@ -101,7 +101,7 @@ export function NotificationCenter() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="relative p-1.5 text-neutral-400 hover:text-neutral-700 transition-colors"
+        className="relative p-1.5 text-neutral-400 hover:text-neutral-700 dark:text-zinc-400 dark:hover:text-purple-300 transition-colors"
         aria-label="Notifications"
       >
         <Bell size={17} />
@@ -111,21 +111,21 @@ export function NotificationCenter() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-neutral-200 rounded-lg shadow-lg z-50 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
-            <span className="text-sm font-semibold text-neutral-900">
-              Notifications {unreadCount > 0 && <span className="text-xs font-normal text-neutral-400">({unreadCount} new)</span>}
+        <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700 rounded-lg shadow-lg z-50 overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100 dark:border-zinc-700">
+            <span className="text-sm font-semibold text-neutral-900 dark:text-white">
+              Notifications {unreadCount > 0 && <span className="text-xs font-normal text-neutral-400 dark:text-zinc-500">({unreadCount} new)</span>}
             </span>
             <div className="flex items-center gap-2">
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAll}
-                  className="text-xs text-neutral-400 hover:text-neutral-700 underline underline-offset-2"
+                  className="text-xs text-neutral-400 hover:text-neutral-700 dark:text-zinc-400 dark:hover:text-purple-300 underline underline-offset-2"
                 >
                   Mark all read
                 </button>
               )}
-              <button onClick={() => setOpen(false)} className="text-neutral-300 hover:text-neutral-600">
+              <button onClick={() => setOpen(false)} className="text-neutral-300 hover:text-neutral-600 dark:text-zinc-600 dark:hover:text-zinc-300">
                 <X size={14} />
               </button>
             </div>
@@ -133,14 +133,14 @@ export function NotificationCenter() {
 
           <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 ? (
-              <p className="px-4 py-6 text-sm text-neutral-400 text-center">No urgent tasks right now.</p>
+              <p className="px-4 py-6 text-sm text-neutral-400 dark:text-zinc-500 text-center">No urgent tasks right now.</p>
             ) : (
               (['overdue', 'due_today', 'due_week'] as NotifType[]).map((type) => {
                 const items = grouped[type]
                 if (items.length === 0) return null
                 return (
                   <div key={type}>
-                    <p className="px-4 pt-3 pb-1 text-xs font-semibold text-neutral-400 uppercase tracking-wide">
+                    <p className="px-4 pt-3 pb-1 text-xs font-semibold text-neutral-400 dark:text-zinc-500 uppercase tracking-wide">
                       {TYPE_LABELS[type]}
                     </p>
                     {items.map((item) => {
@@ -148,15 +148,15 @@ export function NotificationCenter() {
                       return (
                         <div
                           key={item.id}
-                          className={`px-4 py-2.5 border-b border-neutral-50 last:border-0 ${isRead ? 'opacity-50' : ''}`}
+                          className={`px-4 py-2.5 border-b border-neutral-50 dark:border-zinc-800 last:border-0 ${isRead ? 'opacity-50' : ''}`}
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
                               {!isRead && (
                                 <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500 mr-1.5 mb-0.5" />
                               )}
-                              <span className="text-sm font-medium text-neutral-900">{item.templateName}</span>
-                              <p className="text-xs text-neutral-400 mt-0.5">
+                              <span className="text-sm font-medium text-neutral-900 dark:text-white">{item.templateName}</span>
+                              <p className="text-xs text-neutral-400 dark:text-zinc-500 mt-0.5">
                                 {item.clientName} — {format(item.deadline, 'd MMM yyyy')}
                               </p>
                             </div>
@@ -164,7 +164,7 @@ export function NotificationCenter() {
                               {!isRead && (
                                 <button
                                   onClick={() => markNotificationRead(item.id)}
-                                  className="text-xs text-neutral-400 hover:text-neutral-700 whitespace-nowrap"
+                                  className="text-xs text-neutral-400 hover:text-neutral-700 dark:text-zinc-400 dark:hover:text-purple-300 whitespace-nowrap"
                                 >
                                   Read
                                 </button>
@@ -174,7 +174,7 @@ export function NotificationCenter() {
                                   navigate(`/clients/${item.clientId}`)
                                   setOpen(false)
                                 }}
-                                className="text-neutral-300 hover:text-neutral-700"
+                                className="text-neutral-300 hover:text-neutral-700 dark:text-zinc-600 dark:hover:text-zinc-300"
                               >
                                 <ArrowRight size={13} />
                               </button>

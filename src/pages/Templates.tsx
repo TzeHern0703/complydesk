@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, ExternalLink, Trash2, Edit } from 'lucide-react'
+import { Plus, ExternalLink, Trash2, Edit, CheckSquare } from 'lucide-react'
 import { nanoid } from 'nanoid'
 import { useStore } from '../store/useStore'
 import type { TaskTemplate, DeadlineRule } from '../types'
@@ -29,16 +29,78 @@ export function Templates() {
   const [showForm, setShowForm] = useState(false)
   const [editTemplate, setEditTemplate] = useState<TaskTemplate | undefined>()
   const [deleteId, setDeleteId] = useState<string | undefined>()
+  const [selectMode, setSelectMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
+
+  function toggleSelectMode() {
+    setSelectMode((v) => !v)
+    setSelectedIds(new Set())
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function toggleSelectAll() {
+    if (selectedIds.size === templates.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(templates.map((t) => t.id)))
+    }
+  }
+
+  async function handleBulkDelete() {
+    for (const id of selectedIds) {
+      await deleteTemplate(id)
+    }
+    setSelectedIds(new Set())
+    setSelectMode(false)
+    setBulkDeleteOpen(false)
+  }
+
+  const allSelected = templates.length > 0 && selectedIds.size === templates.length
 
   return (
     <div className="px-6 py-8 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-lg font-medium text-neutral-900 dark:text-white">Templates</h1>
-        <Button variant="primary" onClick={() => { setEditTemplate(undefined); setShowForm(true) }}>
-          <Plus size={14} />
-          New template
-        </Button>
+        <div className="flex items-center gap-2">
+          {templates.length > 0 && (
+            <Button variant={selectMode ? 'ghost' : 'secondary'} onClick={toggleSelectMode}>
+              {selectMode ? 'Cancel' : <><CheckSquare size={14} /> Select</>}
+            </Button>
+          )}
+          <Button variant="primary" onClick={() => { setEditTemplate(undefined); setShowForm(true) }}>
+            <Plus size={14} />
+            New template
+          </Button>
+        </div>
       </div>
+
+      {selectMode && templates.length > 0 && (
+        <div className="flex items-center gap-3 mb-3 px-1">
+          <input
+            type="checkbox"
+            checked={allSelected}
+            onChange={toggleSelectAll}
+            className="w-4 h-4 accent-purple-600 dark:accent-purple-500 cursor-pointer"
+          />
+          <span className="text-sm text-neutral-500 dark:text-zinc-400">
+            {selectedIds.size > 0 ? `${selectedIds.size} selected` : 'Select all'}
+          </span>
+          {selectedIds.size > 0 && (
+            <Button variant="danger" size="sm" onClick={() => setBulkDeleteOpen(true)}>
+              Delete ({selectedIds.size})
+            </Button>
+          )}
+        </div>
+      )}
 
       <div className="space-y-2">
         {templates.length === 0 ? (
@@ -53,6 +115,8 @@ export function Templates() {
               template={t}
               onEdit={() => { setEditTemplate(t); setShowForm(true) }}
               onDelete={() => setDeleteId(t.id)}
+              selected={selectMode ? selectedIds.has(t.id) : undefined}
+              onSelect={selectMode ? () => toggleSelect(t.id) : undefined}
             />
           ))
         )}
@@ -83,6 +147,16 @@ export function Templates() {
         confirmLabel="Delete"
         danger
       />
+
+      <ConfirmDialog
+        open={bulkDeleteOpen}
+        onClose={() => setBulkDeleteOpen(false)}
+        onConfirm={handleBulkDelete}
+        title={`Delete ${selectedIds.size} template${selectedIds.size !== 1 ? 's' : ''}?`}
+        message="Existing tasks will remain, but no new tasks will be generated for these templates."
+        confirmLabel="Delete all"
+        danger
+      />
     </div>
   )
 }
@@ -91,13 +165,31 @@ function TemplateRow({
   template,
   onEdit,
   onDelete,
+  selected,
+  onSelect,
 }: {
   template: TaskTemplate
   onEdit?: () => void
   onDelete?: () => void
+  selected?: boolean
+  onSelect?: () => void
 }) {
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700 rounded-xl shadow-sm px-4 py-3 flex items-center gap-3">
+    <div
+      className={`bg-white dark:bg-zinc-900 border rounded-xl shadow-sm px-4 py-3 flex items-center gap-3 transition-colors ${
+        selected
+          ? 'border-purple-400 dark:border-purple-600'
+          : 'border-neutral-200 dark:border-zinc-700'
+      }`}
+    >
+      {onSelect !== undefined && (
+        <input
+          type="checkbox"
+          checked={selected ?? false}
+          onChange={onSelect}
+          className="w-4 h-4 accent-purple-600 dark:accent-purple-500 cursor-pointer flex-shrink-0"
+        />
+      )}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm font-medium text-neutral-900 dark:text-white">{template.name}</span>
@@ -111,7 +203,7 @@ function TemplateRow({
           href={template.governmentWebsite.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-neutral-400 dark:text-zinc-500 hover:text-neutral-900 dark:hover:text-white"
+          className="text-neutral-400 dark:text-zinc-500 hover:text-neutral-900 dark:hover:text-purple-300"
           title={template.governmentWebsite.name}
         >
           <ExternalLink size={14} />
@@ -119,7 +211,7 @@ function TemplateRow({
         <button onClick={onEdit} className="text-neutral-400 dark:text-zinc-500 hover:text-neutral-700 dark:hover:text-zinc-300">
           <Edit size={14} />
         </button>
-        <button onClick={onDelete} className="text-neutral-400 dark:text-zinc-500 hover:text-neutral-900 dark:hover:text-white">
+        <button onClick={onDelete} className="text-neutral-400 dark:text-zinc-500 hover:text-neutral-900 dark:hover:text-purple-300">
           <Trash2 size={14} />
         </button>
       </div>
@@ -324,7 +416,7 @@ function TemplateForm({
                 className={`px-2.5 py-1 rounded text-xs border transition-colors ${
                   selectedMonths.includes(i + 1)
                     ? 'bg-neutral-900 dark:bg-purple-600 text-white border-neutral-900 dark:border-purple-600'
-                    : 'bg-white dark:bg-zinc-800 text-neutral-600 dark:text-zinc-400 border-neutral-200 dark:border-zinc-600 hover:border-neutral-400 dark:hover:border-zinc-400'
+                    : 'bg-white dark:bg-zinc-800 text-neutral-600 dark:text-zinc-400 border-neutral-200 dark:border-zinc-600 hover:border-neutral-400 hover:text-neutral-900 dark:hover:border-purple-500 dark:hover:text-purple-300'
                 }`}
               >
                 {m}
@@ -347,7 +439,7 @@ function TemplateForm({
                 className={`px-2.5 py-1 rounded text-xs border transition-colors ${
                   selectedWeekdays.includes(i)
                     ? 'bg-neutral-900 dark:bg-purple-600 text-white border-neutral-900 dark:border-purple-600'
-                    : 'bg-white dark:bg-zinc-800 text-neutral-600 dark:text-zinc-400 border-neutral-200 dark:border-zinc-600 hover:border-neutral-400 dark:hover:border-zinc-400'
+                    : 'bg-white dark:bg-zinc-800 text-neutral-600 dark:text-zinc-400 border-neutral-200 dark:border-zinc-600 hover:border-neutral-400 hover:text-neutral-900 dark:hover:border-purple-500 dark:hover:text-purple-300'
                 }`}
               >
                 {day}

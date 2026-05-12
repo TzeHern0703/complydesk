@@ -36,7 +36,7 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-zinc-950 flex items-center justify-center">
         <div className="text-sm text-neutral-400">Loading…</div>
       </div>
     )

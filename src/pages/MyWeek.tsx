@@ -205,12 +205,16 @@ function PersonalTaskRow({
   onEdit,
   onDelete,
   readonly,
+  selected,
+  onSelect,
 }: {
   task: PersonalTask
   onToggle: () => void
   onEdit: () => void
   onDelete: () => void
   readonly?: boolean
+  selected?: boolean
+  onSelect?: () => void
 }) {
   const [expanded, setExpanded] = useState(false)
   const done = task.status === 'completed'
@@ -222,8 +226,18 @@ function PersonalTaskRow({
     !done
 
   return (
-    <div className={`border border-neutral-200 dark:border-zinc-700 rounded-xl shadow-sm bg-white dark:bg-zinc-900 ${done ? 'opacity-60' : ''}`}>
+    <div className={`border rounded-xl shadow-sm bg-white dark:bg-zinc-900 transition-colors ${done ? 'opacity-60' : ''} ${
+      selected ? 'border-purple-400 dark:border-purple-600' : 'border-neutral-200 dark:border-zinc-700'
+    }`}>
       <div className="flex items-center gap-3 px-4 py-3">
+        {onSelect !== undefined && (
+          <input
+            type="checkbox"
+            checked={selected ?? false}
+            onChange={onSelect}
+            className="w-4 h-4 accent-purple-600 dark:accent-purple-500 cursor-pointer flex-shrink-0"
+          />
+        )}
         <button
           onClick={onToggle}
           disabled={readonly}
@@ -372,6 +386,9 @@ export function MyWeek() {
   const [deleteId, setDeleteId] = useState<string | undefined>()
   const [recurringCompleteTodo, setRecurringCompleteTodo] = useState<PersonalTask | undefined>()
   const [nextOccurrenceDate, setNextOccurrenceDate] = useState('')
+  const [todoSelectMode, setTodoSelectMode] = useState(false)
+  const [todoSelectedIds, setTodoSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkDeleteTodosOpen, setBulkDeleteTodosOpen] = useState(false)
 
   const weekStartStr = weekStartToString(weekStart)
   const weekDays = getWeekDays(weekStart)
@@ -475,6 +492,41 @@ export function MyWeek() {
   }
 
   const deleteTarget = personalTasks.find((t) => t.id === deleteId)
+
+  function toggleTodoSelectMode() {
+    setTodoSelectMode((v) => !v)
+    setTodoSelectedIds(new Set())
+  }
+
+  function toggleTodoSelect(id: string) {
+    setTodoSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function toggleSelectAllTodos() {
+    const visible = [...pendingTodos, ...(showCompletedTodos ? completedTodos : [])]
+    if (todoSelectedIds.size === visible.length) {
+      setTodoSelectedIds(new Set())
+    } else {
+      setTodoSelectedIds(new Set(visible.map((t) => t.id)))
+    }
+  }
+
+  async function handleBulkDeleteTodos() {
+    for (const id of todoSelectedIds) {
+      await deletePersonalTask(id)
+    }
+    setTodoSelectedIds(new Set())
+    setTodoSelectMode(false)
+    setBulkDeleteTodosOpen(false)
+  }
+
+  const visibleTodos = [...pendingTodos, ...(showCompletedTodos ? completedTodos : [])]
+  const allTodosSelected = visibleTodos.length > 0 && todoSelectedIds.size === visibleTodos.length
 
   return (
     <div className="px-6 py-8 max-w-3xl mx-auto space-y-8">
@@ -637,7 +689,37 @@ export function MyWeek() {
 
       {/* To-Do Section */}
       <section>
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-zinc-500 mb-3">To-Do</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-zinc-500">To-Do</h2>
+          {(pendingTodos.length > 0 || completedTodos.length > 0) && (
+            <button
+              onClick={toggleTodoSelectMode}
+              className="text-xs text-neutral-400 dark:text-zinc-500 hover:text-neutral-700 dark:hover:text-zinc-300 underline underline-offset-2"
+            >
+              {todoSelectMode ? 'Cancel' : 'Select'}
+            </button>
+          )}
+        </div>
+
+        {todoSelectMode && (
+          <div className="flex items-center gap-3 mb-3 px-1">
+            <input
+              type="checkbox"
+              checked={allTodosSelected}
+              onChange={toggleSelectAllTodos}
+              className="w-4 h-4 accent-purple-600 dark:accent-purple-500 cursor-pointer"
+            />
+            <span className="text-sm text-neutral-500 dark:text-zinc-400">
+              {todoSelectedIds.size > 0 ? `${todoSelectedIds.size} selected` : 'Select all'}
+            </span>
+            {todoSelectedIds.size > 0 && (
+              <Button variant="danger" size="sm" onClick={() => setBulkDeleteTodosOpen(true)}>
+                Delete ({todoSelectedIds.size})
+              </Button>
+            )}
+          </div>
+        )}
+
         {pendingTodos.length === 0 && completedTodos.length === 0 ? (
           <p className="text-sm text-neutral-400 dark:text-zinc-500">
             No to-dos yet.{' '}
@@ -654,6 +736,8 @@ export function MyWeek() {
                 onToggle={() => handleTodoToggle(t)}
                 onEdit={() => setEditTask(t)}
                 onDelete={() => setDeleteId(t.id)}
+                selected={todoSelectMode ? todoSelectedIds.has(t.id) : undefined}
+                onSelect={todoSelectMode ? () => toggleTodoSelect(t.id) : undefined}
               />
             ))}
 
@@ -675,6 +759,8 @@ export function MyWeek() {
                   onToggle={() => updatePersonalTaskStatus(t.id, 'pending')}
                   onEdit={() => setEditTask(t)}
                   onDelete={() => setDeleteId(t.id)}
+                  selected={todoSelectMode ? todoSelectedIds.has(t.id) : undefined}
+                  onSelect={todoSelectMode ? () => toggleTodoSelect(t.id) : undefined}
                 />
               ))}
           </div>
@@ -739,6 +825,16 @@ export function MyWeek() {
             : 'Delete this task?'
         }
         confirmLabel="Delete"
+        danger
+      />
+
+      <ConfirmDialog
+        open={bulkDeleteTodosOpen}
+        onClose={() => setBulkDeleteTodosOpen(false)}
+        onConfirm={handleBulkDeleteTodos}
+        title={`Delete ${todoSelectedIds.size} to-do${todoSelectedIds.size !== 1 ? 's' : ''}?`}
+        message="This cannot be undone."
+        confirmLabel="Delete all"
         danger
       />
 

@@ -485,7 +485,7 @@ export function Settings() {
               {notifPermission !== getNotificationPermission() && (
                 <button
                   onClick={() => setNotifPermission(getNotificationPermission())}
-                  className="ml-2 underline underline-offset-2 hover:text-neutral-900 dark:hover:text-white"
+                  className="ml-2 underline underline-offset-2 hover:text-neutral-900 dark:hover:text-purple-300"
                 >
                   Refresh
                 </button>

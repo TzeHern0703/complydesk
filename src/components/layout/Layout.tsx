@@ -106,7 +106,7 @@ export function Layout({ children }: LayoutProps) {
         <div className="flex items-center gap-3 border-b border-neutral-200 dark:border-zinc-800 bg-white dark:bg-black px-4 py-3 lg:hidden">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="text-neutral-500 hover:text-neutral-700 dark:text-zinc-400 dark:hover:text-white"
+            className="text-neutral-500 hover:text-neutral-700 dark:text-zinc-400 dark:hover:text-purple-300"
             aria-label="Open menu"
           >
             <Menu size={20} />
@@ -114,7 +114,7 @@ export function Layout({ children }: LayoutProps) {
           <span className="text-sm font-semibold text-neutral-900 dark:text-white flex-1">ComplyDesk</span>
           <button
             onClick={handleToggleDark}
-            className="text-neutral-400 hover:text-neutral-700 dark:text-zinc-400 dark:hover:text-white transition-colors mr-2"
+            className="text-neutral-400 hover:text-neutral-700 dark:text-zinc-400 dark:hover:text-purple-300 transition-colors mr-2"
             aria-label="Toggle dark mode"
           >
             {darkMode ? <Sun size={18} /> : <Moon size={18} />}
@@ -126,7 +126,7 @@ export function Layout({ children }: LayoutProps) {
         <div className="hidden lg:flex items-center justify-end gap-2 border-b border-neutral-200 dark:border-zinc-800 bg-white dark:bg-black px-6 py-2">
           <button
             onClick={handleToggleDark}
-            className="text-neutral-400 hover:text-neutral-700 dark:text-zinc-400 dark:hover:text-white transition-colors"
+            className="text-neutral-400 hover:text-neutral-700 dark:text-zinc-400 dark:hover:text-purple-300 transition-colors"
             aria-label="Toggle dark mode"
           >
             {darkMode ? <Sun size={18} /> : <Moon size={18} />}
