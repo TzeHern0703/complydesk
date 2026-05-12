@@ -103,7 +103,7 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
 
   return (
     <div
-      className={`border border-neutral-200 rounded-xl bg-white shadow-sm transition-opacity ${
+      className={`border border-neutral-200 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-900 shadow-sm transition-opacity ${
         isSkipped ? 'opacity-50' : isCompleted ? 'opacity-60' : ''
       }`}
     >
@@ -114,8 +114,8 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
           onClick={(e) => { e.stopPropagation(); toggle() }}
           className={`flex-shrink-0 w-4 h-4 rounded border transition-colors ${
             isCompleted
-              ? 'bg-neutral-900 border-neutral-900'
-              : 'border-neutral-300 hover:border-neutral-900'
+              ? 'bg-neutral-900 border-neutral-900 dark:bg-purple-600 dark:border-purple-600'
+              : 'border-neutral-300 hover:border-neutral-900 dark:border-zinc-600 dark:hover:border-purple-500'
           }`}
           aria-label={isCompleted ? 'Mark incomplete' : 'Mark complete'}
         >
@@ -130,27 +130,27 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             {showClient && (
-              <span className="text-xs font-medium text-neutral-400 truncate max-w-[140px]">{client.name}</span>
+              <span className="text-xs font-medium text-neutral-400 dark:text-zinc-500 truncate max-w-[140px]">{client.name}</span>
             )}
             <span
               className={`text-sm font-medium truncate ${
-                isCompleted ? 'line-through text-neutral-400' : 'text-neutral-900'
+                isCompleted ? 'line-through text-neutral-400 dark:text-zinc-500' : 'text-neutral-900 dark:text-white'
               }`}
             >
               {template.name}
             </span>
             {template.category === 'weekly' && template.deadlineRule.weekdays?.length ? (
-              <span className="text-xs text-neutral-400">
+              <span className="text-xs text-neutral-400 dark:text-zinc-500">
                 Weekly – {template.deadlineRule.weekdays.map((d) => WEEKDAY_SHORT[d]).join(', ')}
               </span>
             ) : (
-              <span className="text-xs text-neutral-400">{formatPeriodLabel(task.periodLabel)}</span>
+              <span className="text-xs text-neutral-400 dark:text-zinc-500">{formatPeriodLabel(task.periodLabel)}</span>
             )}
             {task.isManualMode && (
-              <span className="text-xs text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded">Manual</span>
+              <span className="text-xs text-neutral-500 dark:text-zinc-400 bg-neutral-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">Manual</span>
             )}
             {task.templateId.startsWith('custom:') && (
-              <span className="text-xs text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded">Custom</span>
+              <span className="text-xs text-neutral-500 dark:text-zinc-400 bg-neutral-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">Custom</span>
             )}
           </div>
         </div>
@@ -178,7 +178,7 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
               href={template.governmentWebsite.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-neutral-300 hover:text-neutral-900 transition-colors"
+              className="text-neutral-300 hover:text-neutral-900 dark:text-zinc-600 dark:hover:text-white transition-colors"
               title={loginUsername ? `Copy username & open ${template.governmentWebsite.name}` : `Open ${template.governmentWebsite.name}`}
               onClick={(e) => handleWebsiteClick(template.governmentWebsite.url, e)}
             >
@@ -189,7 +189,7 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); setExpanded((v) => !v) }}
-            className="text-neutral-300 hover:text-neutral-600 transition-colors"
+            className="text-neutral-300 hover:text-neutral-600 dark:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
           >
             {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
@@ -198,8 +198,8 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
 
       {/* Expanded */}
       {expanded && (
-        <div className="border-t border-neutral-100 px-4 py-3 space-y-3">
-          <div className="text-xs text-neutral-500">{template.description}</div>
+        <div className="border-t border-neutral-100 dark:border-zinc-800 px-4 py-3 space-y-3">
+          <div className="text-xs text-neutral-500 dark:text-zinc-400">{template.description}</div>
 
           {(template.governmentWebsite.url || template.governmentWebsite.loginUrl) && (
             <div className="flex flex-wrap gap-3">
@@ -208,7 +208,7 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
                   href={template.governmentWebsite.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-neutral-700 hover:text-neutral-900 underline underline-offset-2"
+                  className="inline-flex items-center gap-1 text-xs text-neutral-700 dark:text-zinc-300 hover:text-neutral-900 dark:hover:text-white underline underline-offset-2"
                   onClick={(e) => handleWebsiteClick(template.governmentWebsite.url, e)}
                 >
                   <ExternalLink size={11} />
@@ -220,7 +220,7 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
                   href={template.governmentWebsite.loginUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-neutral-700 hover:text-neutral-900 underline underline-offset-2"
+                  className="inline-flex items-center gap-1 text-xs text-neutral-700 dark:text-zinc-300 hover:text-neutral-900 dark:hover:text-white underline underline-offset-2"
                   onClick={(e) => handleWebsiteClick(template.governmentWebsite.loginUrl!, e)}
                 >
                   <ExternalLink size={11} />
@@ -231,37 +231,37 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
           )}
 
           {loginUsername && (
-            <div className="text-xs text-neutral-500">
-              <span className="text-neutral-400">Username:</span>{' '}
+            <div className="text-xs text-neutral-500 dark:text-zinc-400">
+              <span className="text-neutral-400 dark:text-zinc-500">Username:</span>{' '}
               <span className="font-mono">{loginUsername}</span>
               {loginNotes && (
-                <span className="ml-2 text-neutral-400">({loginNotes})</span>
+                <span className="ml-2 text-neutral-400 dark:text-zinc-500">({loginNotes})</span>
               )}
             </div>
           )}
 
           {/* Inline deadline edit */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-neutral-500">Deadline:</span>
+            <span className="text-xs text-neutral-500 dark:text-zinc-400">Deadline:</span>
             {editingDeadline ? (
               <div className="flex items-center gap-2">
                 <input
                   type="date"
                   value={deadlineInput}
                   onChange={(e) => setDeadlineInput(e.target.value)}
-                  className="rounded border border-neutral-200 px-2 py-1 text-xs text-neutral-900 focus:border-neutral-900 focus:outline-none"
+                  className="rounded border border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-2 py-1 text-xs text-neutral-900 dark:text-white focus:border-neutral-900 dark:focus:border-zinc-400 focus:outline-none"
                 />
-                <button onClick={handleSaveDeadline} className="text-xs text-neutral-900 font-medium hover:underline">
+                <button onClick={handleSaveDeadline} className="text-xs text-neutral-900 dark:text-white font-medium hover:underline">
                   Save
                 </button>
-                <button onClick={() => setEditingDeadline(false)} className="text-xs text-neutral-400 hover:underline">
+                <button onClick={() => setEditingDeadline(false)} className="text-xs text-neutral-400 dark:text-zinc-500 hover:underline">
                   Cancel
                 </button>
               </div>
             ) : (
               <button
                 onClick={() => setEditingDeadline(true)}
-                className="text-xs text-neutral-700 hover:underline"
+                className="text-xs text-neutral-700 dark:text-zinc-300 hover:underline"
               >
                 {formatDeadline(task.deadline)}
               </button>
@@ -303,34 +303,34 @@ export function TaskRow({ task, client, template, showClient = true }: TaskRowPr
       {/* Manual mode: Set Next Deadline modal */}
       {showNextDeadline && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setShowNextDeadline(false)} />
-          <div className="relative bg-white border border-neutral-200 rounded-xl p-6 w-full max-w-sm space-y-4 shadow-lg">
-            <h2 className="text-base font-medium text-neutral-900">Set Next Deadline</h2>
-            <p className="text-sm text-neutral-500">
-              <span className="font-medium text-neutral-900">{template.name}</span> completed!
+          <div className="absolute inset-0 bg-black/40 dark:bg-black/70" onClick={() => setShowNextDeadline(false)} />
+          <div className="relative bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700 rounded-xl p-6 w-full max-w-sm space-y-4 shadow-lg">
+            <h2 className="text-base font-medium text-neutral-900 dark:text-white">Set Next Deadline</h2>
+            <p className="text-sm text-neutral-500 dark:text-zinc-400">
+              <span className="font-medium text-neutral-900 dark:text-white">{template.name}</span> completed!
               When is the next deadline?
             </p>
             <div className="space-y-3">
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-neutral-700">Next deadline</label>
+                <label className="text-sm font-medium text-neutral-700 dark:text-zinc-300">Next deadline</label>
                 <input
                   type="date"
                   value={nextDeadlineInput}
                   onChange={(e) => setNextDeadlineInput(e.target.value)}
-                  className="rounded border border-neutral-200 px-3 py-2 text-sm focus:border-neutral-900 focus:outline-none"
+                  className="rounded border border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-neutral-900 dark:text-white focus:border-neutral-900 dark:focus:border-zinc-400 focus:outline-none"
                 />
               </div>
               <div className="flex items-center gap-2">
-                <label className="text-sm text-neutral-700 flex-shrink-0">Show in dashboard:</label>
+                <label className="text-sm text-neutral-700 dark:text-zinc-300 flex-shrink-0">Show in dashboard:</label>
                 <input
                   type="number"
                   min={0}
                   max={3650}
                   value={nextLeadTime}
                   onChange={(e) => setNextLeadTime(Number(e.target.value))}
-                  className="w-20 rounded border border-neutral-200 px-2 py-1 text-sm focus:border-neutral-900 focus:outline-none"
+                  className="w-20 rounded border border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-2 py-1 text-sm text-neutral-900 dark:text-white focus:border-neutral-900 dark:focus:border-zinc-400 focus:outline-none"
                 />
-                <span className="text-xs text-neutral-400">days before</span>
+                <span className="text-xs text-neutral-400 dark:text-zinc-500">days before</span>
               </div>
             </div>
             <div className="flex justify-between gap-2 pt-2">

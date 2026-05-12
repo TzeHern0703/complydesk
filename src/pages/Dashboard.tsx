@@ -78,13 +78,13 @@ function DashboardPersonalRow({
   const isOv = item.deadline < new Date(new Date().setHours(0, 0, 0, 0))
 
   return (
-    <div className={`border border-neutral-200 rounded-xl shadow-sm bg-white transition-opacity ${isDone ? 'opacity-60' : ''}`}>
+    <div className={`border border-neutral-200 dark:border-zinc-700 rounded-xl shadow-sm bg-white dark:bg-zinc-900 transition-opacity ${isDone ? 'opacity-60' : ''}`}>
       <div className="flex items-center gap-3 px-4 py-3">
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onComplete(item) }}
           className={`flex-shrink-0 w-4 h-4 rounded border transition-colors ${
-            isDone ? 'bg-neutral-900 border-neutral-900' : 'border-neutral-300 hover:border-neutral-900'
+            isDone ? 'bg-neutral-900 border-neutral-900 dark:bg-purple-600 dark:border-purple-600' : 'border-neutral-300 hover:border-neutral-900 dark:border-zinc-600 dark:hover:border-purple-500'
           }`}
           aria-label={isDone ? 'Mark incomplete' : 'Mark complete'}
         >
@@ -95,24 +95,24 @@ function DashboardPersonalRow({
           )}
         </button>
         <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
-          <span className={`text-sm font-medium truncate ${isDone ? 'line-through text-neutral-400' : 'text-neutral-900'}`}>
+          <span className={`text-sm font-medium truncate ${isDone ? 'line-through text-neutral-400 dark:text-zinc-500' : 'text-neutral-900 dark:text-white'}`}>
             {item.title}
           </span>
-          <span className="text-xs bg-neutral-100 text-neutral-500 px-1.5 py-0.5 rounded">
+          <span className="text-xs bg-neutral-100 dark:bg-zinc-800 text-neutral-500 dark:text-zinc-400 px-1.5 py-0.5 rounded">
             {TYPE_LABELS[item.type]}
           </span>
           {task?.recurringMonths && (
-            <span className="text-xs text-neutral-400">↻ every {task.recurringMonths}mo</span>
+            <span className="text-xs text-neutral-400 dark:text-zinc-500">↻ every {task.recurringMonths}mo</span>
           )}
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <span className={`text-xs px-2 py-0.5 rounded ${isOv ? 'bg-red-50 text-red-600' : 'bg-neutral-100 text-neutral-500'}`}>
+          <span className={`text-xs px-2 py-0.5 rounded ${isOv ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 'bg-neutral-100 dark:bg-zinc-800 text-neutral-500 dark:text-zinc-400'}`}>
             {deadlineLabel}
           </span>
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); navigate('/my-week') }}
-            className="text-xs text-neutral-400 hover:text-neutral-700 underline underline-offset-2"
+            className="text-xs text-neutral-400 dark:text-zinc-500 hover:text-neutral-700 dark:hover:text-zinc-300 underline underline-offset-2"
           >
             view
           </button>
@@ -168,14 +168,14 @@ function MixedSection({
         className="flex items-center gap-2 mb-3 w-full text-left"
         onClick={() => setCollapsed((v) => !v)}
       >
-        <span className="text-xs font-semibold uppercase tracking-wide text-neutral-500">{title}</span>
-        <span className="text-xs text-neutral-400">({totalCount})</span>
-        <span className="ml-auto text-neutral-400 text-xs">{collapsed ? '▾' : '▴'}</span>
+        <span className="text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-zinc-400">{title}</span>
+        <span className="text-xs text-neutral-400 dark:text-zinc-500">({totalCount})</span>
+        <span className="ml-auto text-neutral-400 dark:text-zinc-500 text-xs">{collapsed ? '▾' : '▴'}</span>
       </button>
       {!collapsed && (
         <div className="space-y-2">
           {totalCount === 0 && emptyMessage ? (
-            <p className="text-sm text-neutral-400">{emptyMessage}</p>
+            <p className="text-sm text-neutral-400 dark:text-zinc-500">{emptyMessage}</p>
           ) : (
             mergedItems.map((item) => {
               if (item.type === 'compliance') {
@@ -356,8 +356,8 @@ export function Dashboard() {
   return (
     <div className="px-6 py-8 max-w-3xl mx-auto space-y-8">
       <div>
-        <h1 className="text-lg font-medium text-neutral-900">Dashboard</h1>
-        <p className="text-sm text-neutral-400 mt-0.5">{format(now, 'EEEE, d MMMM yyyy')}</p>
+        <h1 className="text-lg font-medium text-neutral-900 dark:text-white">Dashboard</h1>
+        <p className="text-sm text-neutral-400 dark:text-zinc-500 mt-0.5">{format(now, 'EEEE, d MMMM yyyy')}</p>
       </div>
 
       {!bannerDismissed && (
@@ -372,7 +372,7 @@ export function Dashboard() {
         <NotificationPermissionCard onDismiss={() => setPermissionCardDismissed(true)} />
       )}
 
-      <div className="bg-white border border-neutral-200 rounded-xl shadow-sm p-4">
+      <div className="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700 rounded-xl shadow-sm p-4">
         <ProgressBar
           value={completedThisMonth.length}
           max={monthTasks.length}
@@ -467,8 +467,8 @@ function MyWeekWidget() {
 
   function renderItem(label: string, time?: string) {
     return (
-      <div key={label} className="flex items-center gap-2 text-sm text-neutral-700 py-0.5">
-        <span className="w-3.5 h-3.5 rounded border border-neutral-300 flex-shrink-0" />
+      <div key={label} className="flex items-center gap-2 text-sm text-neutral-700 dark:text-zinc-300 py-0.5">
+        <span className="w-3.5 h-3.5 rounded border border-neutral-300 dark:border-zinc-600 flex-shrink-0" />
         <span>{label}</span>
         {time && <span className="text-xs text-neutral-400">{formatTime12h(time)}</span>}
       </div>
@@ -476,25 +476,25 @@ function MyWeekWidget() {
   }
 
   return (
-    <div className="border border-neutral-200 rounded p-4 space-y-4">
+    <div className="border border-neutral-200 dark:border-zinc-700 rounded p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-neutral-900">My Week</h2>
+        <h2 className="text-sm font-semibold text-neutral-900 dark:text-white">My Week</h2>
         <button
           type="button"
           onClick={() => navigate('/my-week')}
-          className="text-xs text-neutral-400 hover:text-neutral-900 underline underline-offset-2"
+          className="text-xs text-neutral-400 dark:text-zinc-500 hover:text-neutral-900 dark:hover:text-white underline underline-offset-2"
         >
           Open My Week →
         </button>
       </div>
 
       {allEmpty ? (
-        <p className="text-sm text-neutral-400">No unscheduled or undated tasks this week.</p>
+        <p className="text-sm text-neutral-400 dark:text-zinc-500">No unscheduled or undated tasks this week.</p>
       ) : (
         <div className="space-y-3">
           {todayInstances.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-neutral-500 mb-1">
+              <p className="text-xs font-medium text-neutral-500 dark:text-zinc-400 mb-1">
                 Today's recurring ({todayInstances.length} pending)
               </p>
               {todayInstances.map((i) => {
@@ -506,7 +506,7 @@ function MyWeekWidget() {
 
           {unscheduled.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-neutral-500 mb-1">
+              <p className="text-xs font-medium text-neutral-500 dark:text-zinc-400 mb-1">
                 Unscheduled this week ({unscheduled.length})
               </p>
               {unscheduled.map((t) => renderItem(t.title))}
@@ -515,7 +515,7 @@ function MyWeekWidget() {
 
           {undatedTodos.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-neutral-500 mb-1">
+              <p className="text-xs font-medium text-neutral-500 dark:text-zinc-400 mb-1">
                 To-dos without deadline ({undatedTodos.length})
               </p>
               {undatedTodos.map((t) => renderItem(t.title))}
@@ -536,15 +536,15 @@ function UnprocessedEmailWidget() {
   return (
     <button
       onClick={() => navigate('/inbox?filter=unprocessed')}
-      className="w-full text-left bg-white border border-neutral-200 rounded-xl shadow-sm p-4 hover:border-indigo-300 hover:shadow-md transition-all flex items-center justify-between"
+      className="w-full text-left bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700 rounded-xl shadow-sm p-4 hover:border-indigo-300 dark:hover:border-purple-700 hover:shadow-md transition-all flex items-center justify-between"
     >
       <div>
-        <p className="text-sm font-medium text-neutral-900">
+        <p className="text-sm font-medium text-neutral-900 dark:text-white">
           {unprocessed} unprocessed work email{unprocessed !== 1 ? 's' : ''}
         </p>
-        <p className="text-xs text-neutral-400 mt-0.5">Click to review in Inbox</p>
+        <p className="text-xs text-neutral-400 dark:text-zinc-500 mt-0.5">Click to review in Inbox</p>
       </div>
-      <span className="text-xs font-semibold bg-neutral-900 text-white px-2 py-1 rounded">
+      <span className="text-xs font-semibold bg-neutral-900 dark:bg-purple-600 text-white px-2 py-1 rounded">
         {unprocessed}
       </span>
     </button>

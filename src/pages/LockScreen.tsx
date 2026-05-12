@@ -30,16 +30,16 @@ export function LockScreen({ passwordHash, onUnlock }: LockScreenProps) {
   }
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <div className="bg-white border border-neutral-200 rounded p-8 w-full max-w-sm text-center space-y-5">
+    <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700 rounded p-8 w-full max-w-sm text-center space-y-5">
         <div className="flex justify-center">
-          <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center">
-            <Lock size={20} className="text-neutral-900" />
+          <div className="w-12 h-12 bg-neutral-100 dark:bg-zinc-800 rounded-full flex items-center justify-center">
+            <Lock size={20} className="text-neutral-900 dark:text-white" />
           </div>
         </div>
         <div>
-          <h1 className="text-base font-medium text-neutral-900">ComplyDesk</h1>
-          <p className="text-sm text-neutral-400 mt-1">Enter your password to unlock</p>
+          <h1 className="text-base font-medium text-neutral-900 dark:text-white">ComplyDesk</h1>
+          <p className="text-sm text-neutral-400 dark:text-zinc-500 mt-1">Enter your password to unlock</p>
         </div>
         <div className="text-left space-y-3">
           <Input
@@ -50,7 +50,7 @@ export function LockScreen({ passwordHash, onUnlock }: LockScreenProps) {
             onKeyDown={(e) => e.key === 'Enter' && handleUnlock()}
             autoFocus
           />
-          {error && <p className="text-xs text-neutral-900 font-medium">{error}</p>}
+          {error && <p className="text-xs text-neutral-900 dark:text-zinc-300 font-medium">{error}</p>}
           <Button variant="primary" className="w-full justify-center" onClick={handleUnlock}>
             Unlock
           </Button>

@@ -111,7 +111,7 @@ export function Inbox() {
   if (!settings?.gmailClientId) {
     return (
       <div className="px-6 py-8 max-w-3xl mx-auto">
-        <h1 className="text-lg font-medium text-neutral-900 mb-6">Inbox</h1>
+        <h1 className="text-lg font-medium text-neutral-900 dark:text-white mb-6">Inbox</h1>
         <EmptyState
           title="Gmail not configured"
           description="Connect your Gmail account in Settings to use the Inbox."
@@ -128,7 +128,7 @@ export function Inbox() {
   return (
     <div className="px-6 py-8 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg font-medium text-neutral-900">Inbox</h1>
+        <h1 className="text-lg font-medium text-neutral-900 dark:text-white">Inbox</h1>
         <Button variant="secondary" onClick={handleSync} disabled={syncing}>
           <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} />
           {syncing ? 'Syncing…' : 'Sync'}
@@ -136,13 +136,13 @@ export function Inbox() {
       </div>
 
       {syncError && (
-        <div className="mb-4 px-4 py-3 border border-neutral-200 rounded text-sm text-neutral-900">
+        <div className="mb-4 px-4 py-3 border border-neutral-200 dark:border-zinc-700 rounded text-sm text-neutral-900 dark:text-white dark:bg-zinc-900">
           {syncError}
         </div>
       )}
 
       {!tokenValid && settings.gmailClientId && (
-        <div className="mb-4 px-4 py-3 bg-neutral-50 border border-neutral-200 rounded text-sm text-neutral-700">
+        <div className="mb-4 px-4 py-3 bg-neutral-50 dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700 rounded text-sm text-neutral-700 dark:text-zinc-300">
           Gmail token expired.{' '}
           <a href="/settings" className="underline font-medium">
             Reconnect in Settings.
@@ -152,15 +152,15 @@ export function Inbox() {
 
       {/* Tabs + search */}
       <div className="flex items-center gap-4 mb-4">
-        <div className="flex gap-1 border border-neutral-200 rounded p-0.5">
+        <div className="flex gap-1 border border-neutral-200 dark:border-zinc-700 rounded p-0.5">
           {(['all', 'unprocessed', 'attachments'] as FilterTab[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-3 py-1.5 text-xs rounded transition-colors ${
                 activeTab === tab
-                  ? 'bg-neutral-900 text-white'
-                  : 'text-neutral-500 hover:text-neutral-900'
+                  ? 'bg-neutral-900 dark:bg-purple-600 text-white'
+                  : 'text-neutral-500 dark:text-zinc-400 hover:text-neutral-900 dark:hover:text-white'
               }`}
             >
               {tab === 'all' ? 'All' : tab === 'unprocessed' ? 'Unprocessed' : 'Attachments'}
@@ -223,13 +223,13 @@ function EmailRow({
   const clientName = clients.find((c) => c.id === msg.clientId)?.name
 
   return (
-    <div className={`border border-neutral-200 rounded-xl shadow-sm bg-white ${msg.isProcessed ? 'opacity-60' : ''}`}>
+    <div className={`border border-neutral-200 dark:border-zinc-700 rounded-xl shadow-sm bg-white dark:bg-zinc-900 ${msg.isProcessed ? 'opacity-60' : ''}`}>
       <div className="flex items-center gap-3 px-4 py-3">
         {/* Processed checkbox */}
         <button
           onClick={() => onProcessed(!msg.isProcessed)}
           className={`flex-shrink-0 w-4 h-4 rounded border transition-colors ${
-            msg.isProcessed ? 'bg-neutral-900 border-neutral-900' : 'border-neutral-300 hover:border-neutral-900'
+            msg.isProcessed ? 'bg-neutral-900 border-neutral-900 dark:bg-purple-600 dark:border-purple-600' : 'border-neutral-300 hover:border-neutral-900 dark:border-zinc-600 dark:hover:border-purple-500'
           }`}
           title={msg.isProcessed ? 'Mark unprocessed' : 'Mark processed'}
         >
@@ -242,27 +242,27 @@ function EmailRow({
 
         <div className="flex-1 min-w-0 cursor-pointer" onClick={onToggle}>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-neutral-900 truncate">{msg.from || msg.fromEmail}</span>
-            {msg.hasAttachments && <Paperclip size={12} className="text-neutral-400 flex-shrink-0" />}
+            <span className="text-sm font-medium text-neutral-900 dark:text-white truncate">{msg.from || msg.fromEmail}</span>
+            {msg.hasAttachments && <Paperclip size={12} className="text-neutral-400 dark:text-zinc-500 flex-shrink-0" />}
             {clientName && (
-              <span className="text-xs bg-neutral-100 text-neutral-600 px-1.5 py-0.5 rounded flex-shrink-0">
+              <span className="text-xs bg-neutral-100 dark:bg-zinc-800 text-neutral-600 dark:text-zinc-400 px-1.5 py-0.5 rounded flex-shrink-0">
                 {clientName}
               </span>
             )}
           </div>
-          <p className={`text-sm truncate ${msg.isProcessed ? 'text-neutral-400' : 'text-neutral-700'}`}>
+          <p className={`text-sm truncate ${msg.isProcessed ? 'text-neutral-400 dark:text-zinc-500' : 'text-neutral-700 dark:text-zinc-300'}`}>
             {msg.subject}
           </p>
-          <p className="text-xs text-neutral-400 truncate">{msg.snippet}</p>
+          <p className="text-xs text-neutral-400 dark:text-zinc-500 truncate">{msg.snippet}</p>
         </div>
 
         <div className="flex-shrink-0 flex items-center gap-2">
-          <span className="text-xs text-neutral-400 whitespace-nowrap">
+          <span className="text-xs text-neutral-400 dark:text-zinc-500 whitespace-nowrap">
             {format(new Date(msg.date), 'd MMM')}
           </span>
           <button
             onClick={onToggle}
-            className="text-neutral-300 hover:text-neutral-600"
+            className="text-neutral-300 hover:text-neutral-600 dark:text-zinc-600 dark:hover:text-zinc-300"
           >
             {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
@@ -270,15 +270,15 @@ function EmailRow({
       </div>
 
       {isExpanded && (
-        <div className="border-t border-neutral-100 px-4 py-4 space-y-4">
+        <div className="border-t border-neutral-100 dark:border-zinc-800 px-4 py-4 space-y-4">
           {/* Client tagging */}
           <div className="flex items-center gap-2">
-            <Tag size={12} className="text-neutral-400" />
-            <span className="text-xs text-neutral-500">Client:</span>
+            <Tag size={12} className="text-neutral-400 dark:text-zinc-500" />
+            <span className="text-xs text-neutral-500 dark:text-zinc-400">Client:</span>
             <select
               value={msg.clientId ?? ''}
               onChange={(e) => onClientChange(e.target.value || undefined)}
-              className="text-xs rounded border border-neutral-200 px-2 py-1 text-neutral-900 focus:border-neutral-900 focus:outline-none"
+              className="text-xs rounded border border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-2 py-1 text-neutral-900 dark:text-white focus:border-neutral-900 dark:focus:border-zinc-400 focus:outline-none"
             >
               <option value="">Unassigned</option>
               {clients.map((c) => (
@@ -288,14 +288,14 @@ function EmailRow({
           </div>
 
           {/* Email body */}
-          <div className="rounded border border-neutral-100 bg-neutral-50 p-3 max-h-64 overflow-y-auto">
+          <div className="rounded border border-neutral-100 dark:border-zinc-800 bg-neutral-50 dark:bg-zinc-800 p-3 max-h-64 overflow-y-auto">
             {msg.bodyHtml ? (
               <div
-                className="text-sm text-neutral-700 prose prose-sm max-w-none"
+                className="text-sm text-neutral-700 dark:text-zinc-300 prose prose-sm max-w-none"
                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(msg.bodyHtml, { USE_PROFILES: { html: true } }) }}
               />
             ) : (
-              <pre className="text-xs text-neutral-600 whitespace-pre-wrap font-sans">
+              <pre className="text-xs text-neutral-600 dark:text-zinc-400 whitespace-pre-wrap font-sans">
                 {msg.bodyText ?? msg.snippet}
               </pre>
             )}
@@ -305,7 +305,7 @@ function EmailRow({
           {msg.hasAttachments && msg.attachments.length > 0 && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-medium text-neutral-700">
+                <p className="text-xs font-medium text-neutral-700 dark:text-zinc-300">
                   {msg.attachments.length} attachment{msg.attachments.length !== 1 ? 's' : ''}
                 </p>
                 {msg.attachments.length > 1 && (

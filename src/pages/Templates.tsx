@@ -33,7 +33,7 @@ export function Templates() {
   return (
     <div className="px-6 py-8 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg font-medium text-neutral-900">Templates</h1>
+        <h1 className="text-lg font-medium text-neutral-900 dark:text-white">Templates</h1>
         <Button variant="primary" onClick={() => { setEditTemplate(undefined); setShowForm(true) }}>
           <Plus size={14} />
           New template
@@ -97,29 +97,29 @@ function TemplateRow({
   onDelete?: () => void
 }) {
   return (
-    <div className="bg-white border border-neutral-200 rounded-xl shadow-sm px-4 py-3 flex items-center gap-3">
+    <div className="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700 rounded-xl shadow-sm px-4 py-3 flex items-center gap-3">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm font-medium text-neutral-900">{template.name}</span>
-          {template.nameZh && <span className="text-xs text-neutral-400">{template.nameZh}</span>}
+          <span className="text-sm font-medium text-neutral-900 dark:text-white">{template.name}</span>
+          {template.nameZh && <span className="text-xs text-neutral-400 dark:text-zinc-500">{template.nameZh}</span>}
           <Badge>{categoryLabels[template.category] ?? template.category}</Badge>
         </div>
-        <p className="text-xs text-neutral-400 mt-0.5 truncate">{template.description}</p>
+        <p className="text-xs text-neutral-400 dark:text-zinc-500 mt-0.5 truncate">{template.description}</p>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
         <a
           href={template.governmentWebsite.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-neutral-400 hover:text-neutral-900"
+          className="text-neutral-400 dark:text-zinc-500 hover:text-neutral-900 dark:hover:text-white"
           title={template.governmentWebsite.name}
         >
           <ExternalLink size={14} />
         </a>
-        <button onClick={onEdit} className="text-neutral-400 hover:text-neutral-700">
+        <button onClick={onEdit} className="text-neutral-400 dark:text-zinc-500 hover:text-neutral-700 dark:hover:text-zinc-300">
           <Edit size={14} />
         </button>
-        <button onClick={onDelete} className="text-neutral-400 hover:text-neutral-900">
+        <button onClick={onDelete} className="text-neutral-400 dark:text-zinc-500 hover:text-neutral-900 dark:hover:text-white">
           <Trash2 size={14} />
         </button>
       </div>
@@ -222,7 +222,7 @@ function TemplateForm({
 
   return (
     <div className="space-y-5">
-      {error && <p className="text-sm text-neutral-900 font-medium">{error}</p>}
+      {error && <p className="text-sm text-neutral-900 dark:text-white font-medium">{error}</p>}
 
       <div className="grid grid-cols-2 gap-4">
         <Input label="Name (English) *" value={name} onChange={(e) => setName(e.target.value)} />
@@ -231,11 +231,11 @@ function TemplateForm({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-neutral-700">Category</label>
+          <label className="text-sm font-medium text-neutral-700 dark:text-zinc-300">Category</label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value as TaskTemplate['category'])}
-            className="rounded border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-neutral-900 focus:outline-none"
+            className="rounded border border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-neutral-900 dark:text-white focus:border-neutral-900 dark:focus:border-zinc-400 focus:outline-none"
           >
             <option value="monthly">Monthly</option>
             <option value="bi-monthly">Bi-Monthly</option>
@@ -249,11 +249,11 @@ function TemplateForm({
 
         {showDayOfMonth && (
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-neutral-700">Day of month</label>
+            <label className="text-sm font-medium text-neutral-700 dark:text-zinc-300">Day of month</label>
             <select
               value={dayOfMonth}
               onChange={(e) => setDayOfMonth(e.target.value)}
-              className="rounded border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-neutral-900 focus:outline-none"
+              className="rounded border border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-neutral-900 dark:text-white focus:border-neutral-900 dark:focus:border-zinc-400 focus:outline-none"
             >
               {Array.from({ length: 28 }, (_, i) => i + 1).map((d) => (
                 <option key={d} value={d}>{d}</option>
@@ -265,11 +265,11 @@ function TemplateForm({
 
         {showYearlyOptions && (
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-neutral-700">Deadline type</label>
+            <label className="text-sm font-medium text-neutral-700 dark:text-zinc-300">Deadline type</label>
             <select
               value={deadlineType}
               onChange={(e) => setDeadlineType(e.target.value as DeadlineRule['type'])}
-              className="rounded border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-neutral-900 focus:outline-none"
+              className="rounded border border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-neutral-900 dark:text-white focus:border-neutral-900 dark:focus:border-zinc-400 focus:outline-none"
             >
               <option value="day-of-year">Fixed date (e.g. March 31)</option>
               <option value="anniversary-based">Anniversary-based (set per client)</option>
@@ -281,11 +281,11 @@ function TemplateForm({
       {showYearlyOptions && deadlineType === 'day-of-year' && (
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-neutral-700">Month</label>
+            <label className="text-sm font-medium text-neutral-700 dark:text-zinc-300">Month</label>
             <select
               value={yearlyMonth}
               onChange={(e) => setYearlyMonth(e.target.value)}
-              className="rounded border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-neutral-900 focus:outline-none"
+              className="rounded border border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-neutral-900 dark:text-white focus:border-neutral-900 dark:focus:border-zinc-400 focus:outline-none"
             >
               {MONTHS.map((m, i) => (
                 <option key={i + 1} value={i + 1}>{m}</option>
@@ -314,7 +314,7 @@ function TemplateForm({
 
       {showMonthPicker && (
         <div>
-          <p className="text-sm font-medium text-neutral-700 mb-2">Applicable months</p>
+          <p className="text-sm font-medium text-neutral-700 dark:text-zinc-300 mb-2">Applicable months</p>
           <div className="flex flex-wrap gap-2">
             {MONTHS.map((m, i) => (
               <button
@@ -323,21 +323,21 @@ function TemplateForm({
                 onClick={() => toggleMonth(i + 1)}
                 className={`px-2.5 py-1 rounded text-xs border transition-colors ${
                   selectedMonths.includes(i + 1)
-                    ? 'bg-neutral-900 text-white border-neutral-900'
-                    : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-400'
+                    ? 'bg-neutral-900 dark:bg-purple-600 text-white border-neutral-900 dark:border-purple-600'
+                    : 'bg-white dark:bg-zinc-800 text-neutral-600 dark:text-zinc-400 border-neutral-200 dark:border-zinc-600 hover:border-neutral-400 dark:hover:border-zinc-400'
                 }`}
               >
                 {m}
               </button>
             ))}
           </div>
-          <p className="text-xs text-neutral-400 mt-1">Leave blank to apply every period</p>
+          <p className="text-xs text-neutral-400 dark:text-zinc-500 mt-1">Leave blank to apply every period</p>
         </div>
       )}
 
       {showWeekdayPicker && (
         <div>
-          <p className="text-sm font-medium text-neutral-700 mb-2">Days of week *</p>
+          <p className="text-sm font-medium text-neutral-700 dark:text-zinc-300 mb-2">Days of week *</p>
           <div className="flex flex-wrap gap-2">
             {WEEKDAY_SHORT.map((day, i) => (
               <button
@@ -346,15 +346,15 @@ function TemplateForm({
                 onClick={() => toggleWeekday(i)}
                 className={`px-2.5 py-1 rounded text-xs border transition-colors ${
                   selectedWeekdays.includes(i)
-                    ? 'bg-neutral-900 text-white border-neutral-900'
-                    : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-400'
+                    ? 'bg-neutral-900 dark:bg-purple-600 text-white border-neutral-900 dark:border-purple-600'
+                    : 'bg-white dark:bg-zinc-800 text-neutral-600 dark:text-zinc-400 border-neutral-200 dark:border-zinc-600 hover:border-neutral-400 dark:hover:border-zinc-400'
                 }`}
               >
                 {day}
               </button>
             ))}
           </div>
-          <p className="text-xs text-neutral-400 mt-1">Select at least one day</p>
+          <p className="text-xs text-neutral-400 dark:text-zinc-500 mt-1">Select at least one day</p>
         </div>
       )}
 

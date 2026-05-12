@@ -30,18 +30,18 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: M
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40 dark:bg-black/70" onClick={onClose} />
       <div
-        className={`relative w-full ${sizes[size]} bg-white border border-neutral-200 flex flex-col
+        className={`relative w-full ${sizes[size]} bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700 flex flex-col
           rounded-t-xl sm:rounded-xl
           max-h-[95vh] sm:max-h-[90vh]`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-neutral-100 px-6 py-4 flex-shrink-0">
-          <h2 className="text-base font-medium text-neutral-900">{title}</h2>
+        <div className="flex items-center justify-between border-b border-neutral-100 dark:border-zinc-700 px-6 py-4 flex-shrink-0">
+          <h2 className="text-base font-medium text-neutral-900 dark:text-white">{title}</h2>
           <button
             onClick={onClose}
-            className="text-neutral-400 hover:text-neutral-700 transition-colors"
+            className="text-neutral-400 hover:text-neutral-700 dark:text-zinc-400 dark:hover:text-white transition-colors"
             aria-label="Close"
           >
             <X size={18} />
@@ -55,7 +55,7 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: M
 
         {/* Optional sticky footer */}
         {footer && (
-          <div className="flex-shrink-0 border-t border-neutral-100 px-6 py-4 bg-white rounded-b-xl">
+          <div className="flex-shrink-0 border-t border-neutral-100 dark:border-zinc-700 px-6 py-4 bg-white dark:bg-zinc-900 rounded-b-xl">
             {footer}
           </div>
         )}

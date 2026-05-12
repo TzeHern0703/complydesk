@@ -257,12 +257,12 @@ export function Settings() {
 
   return (
     <div className="px-6 py-8 max-w-2xl mx-auto space-y-10">
-      <h1 className="text-lg font-medium text-neutral-900">Settings</h1>
+      <h1 className="text-lg font-medium text-neutral-900 dark:text-white">Settings</h1>
 
       {/* Export / Import */}
       <section className="space-y-4">
-        <h2 className="text-sm font-medium text-neutral-900 border-b border-neutral-100 pb-2">Data Backup</h2>
-        <p className="text-sm text-neutral-500">
+        <h2 className="text-sm font-medium text-neutral-900 dark:text-white border-b border-neutral-100 dark:border-zinc-800 pb-2">Data Backup</h2>
+        <p className="text-sm text-neutral-500 dark:text-zinc-400">
           Export all your data as an Excel file. Import to restore from a previous JSON backup.
         </p>
         <div className="flex flex-wrap gap-3">
@@ -270,18 +270,18 @@ export function Settings() {
             <Download size={14} />
             Export to Excel
           </Button>
-          <label className="inline-flex items-center gap-1.5 rounded border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition-colors cursor-pointer">
+          <label className="inline-flex items-center gap-1.5 rounded border border-neutral-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2 text-sm font-medium text-neutral-700 dark:text-zinc-200 hover:bg-neutral-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer">
             <input type="file" accept=".json" onChange={handleImportFile} className="hidden" />
             <Upload size={14} />
             Import data
           </label>
         </div>
         <div className="flex items-center gap-4">
-          <label className="flex items-center gap-2 text-sm text-neutral-600 cursor-pointer">
+          <label className="flex items-center gap-2 text-sm text-neutral-600 dark:text-zinc-400 cursor-pointer">
             <input type="radio" name="importMode" value="merge" checked={importMode === 'merge'} onChange={() => setImportMode('merge')} className="accent-neutral-900" />
             Merge
           </label>
-          <label className="flex items-center gap-2 text-sm text-neutral-600 cursor-pointer">
+          <label className="flex items-center gap-2 text-sm text-neutral-600 dark:text-zinc-400 cursor-pointer">
             <input type="radio" name="importMode" value="replace" checked={importMode === 'replace'} onChange={() => setImportMode('replace')} className="accent-neutral-900" />
             Replace (overwrite everything)
           </label>
@@ -290,14 +290,14 @@ export function Settings() {
 
       {/* Gmail Integration */}
       <section className="space-y-4">
-        <h2 className="text-sm font-medium text-neutral-900 border-b border-neutral-100 pb-2">Gmail Integration</h2>
-        <p className="text-xs text-neutral-400">
+        <h2 className="text-sm font-medium text-neutral-900 dark:text-white border-b border-neutral-100 dark:border-zinc-800 pb-2">Gmail Integration</h2>
+        <p className="text-xs text-neutral-400 dark:text-zinc-500">
           Your Gmail data never leaves your browser. All processing happens locally.
         </p>
 
-        <div className="bg-neutral-50 border border-neutral-200 rounded p-4 space-y-2">
-          <p className="text-xs font-medium text-neutral-700">Setup instructions</p>
-          <ol className="text-xs text-neutral-500 space-y-1 list-decimal list-inside">
+        <div className="bg-neutral-50 dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700 rounded p-4 space-y-2">
+          <p className="text-xs font-medium text-neutral-700 dark:text-zinc-300">Setup instructions</p>
+          <ol className="text-xs text-neutral-500 dark:text-zinc-400 space-y-1 list-decimal list-inside">
             <li>Go to <strong>console.cloud.google.com</strong> → Create a project</li>
             <li>Enable the <strong>Gmail API</strong></li>
             <li>Create <strong>OAuth 2.0 credentials</strong> (Web application type)</li>
@@ -330,36 +330,36 @@ export function Settings() {
             )}
           </div>
           {tokenValid && (
-            <p className="text-xs text-neutral-500 flex items-center gap-1.5">
-              <span className="inline-block w-2 h-2 rounded-full bg-neutral-900" />
+            <p className="text-xs text-neutral-500 dark:text-zinc-400 flex items-center gap-1.5">
+              <span className="inline-block w-2 h-2 rounded-full bg-neutral-900 dark:bg-purple-500" />
               Connected
             </p>
           )}
-          {gmailStatus && <p className="text-xs text-neutral-600">{gmailStatus}</p>}
+          {gmailStatus && <p className="text-xs text-neutral-600 dark:text-zinc-400">{gmailStatus}</p>}
         </div>
 
         {/* Forwarding placeholder */}
-        <div className="border border-neutral-200 rounded p-3">
-          <p className="text-xs font-medium text-neutral-500">Forwarding email — coming soon</p>
-          <p className="text-xs text-neutral-400 mt-0.5">Forward emails to a dedicated address for automatic capture. Requires a backend service.</p>
+        <div className="border border-neutral-200 dark:border-zinc-700 rounded p-3">
+          <p className="text-xs font-medium text-neutral-500 dark:text-zinc-400">Forwarding email — coming soon</p>
+          <p className="text-xs text-neutral-400 dark:text-zinc-500 mt-0.5">Forward emails to a dedicated address for automatic capture. Requires a backend service.</p>
         </div>
       </section>
 
       {/* Email Filters */}
       <section className="space-y-4">
-        <h2 className="text-sm font-medium text-neutral-900 border-b border-neutral-100 pb-2">Email Filters</h2>
-        <p className="text-sm text-neutral-500">Define what counts as a work email when syncing from Gmail.</p>
+        <h2 className="text-sm font-medium text-neutral-900 dark:text-white border-b border-neutral-100 dark:border-zinc-800 pb-2">Email Filters</h2>
+        <p className="text-sm text-neutral-500 dark:text-zinc-400">Define what counts as a work email when syncing from Gmail.</p>
 
         <div className="space-y-1">
           {filters.map((f) => (
-            <div key={f.id} className="flex items-center gap-2 py-1.5 border-b border-neutral-50">
-              <span className="text-xs bg-neutral-100 text-neutral-600 px-1.5 py-0.5 rounded min-w-[100px]">
+            <div key={f.id} className="flex items-center gap-2 py-1.5 border-b border-neutral-50 dark:border-zinc-800">
+              <span className="text-xs bg-neutral-100 dark:bg-zinc-800 text-neutral-600 dark:text-zinc-400 px-1.5 py-0.5 rounded min-w-[100px]">
                 {filterTypeLabels[f.type]}
               </span>
-              <span className="text-sm text-neutral-900 flex-1">{f.value}</span>
+              <span className="text-sm text-neutral-900 dark:text-white flex-1">{f.value}</span>
               <button
                 onClick={() => setFilters((prev) => prev.filter((x) => x.id !== f.id))}
-                className="text-neutral-300 hover:text-neutral-700"
+                className="text-neutral-300 dark:text-zinc-600 hover:text-neutral-700 dark:hover:text-zinc-300"
               >
                 <X size={14} />
               </button>
@@ -371,7 +371,7 @@ export function Settings() {
           <select
             value={newFilterType}
             onChange={(e) => setNewFilterType(e.target.value as EmailFilter['type'])}
-            className="rounded border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-neutral-900 focus:outline-none"
+            className="rounded border border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-neutral-900 dark:text-white focus:border-neutral-900 dark:focus:border-zinc-400 focus:outline-none"
           >
             {(Object.entries(filterTypeLabels) as [EmailFilter['type'], string][]).map(([k, v]) => (
               <option key={k} value={k}>{v}</option>
@@ -396,21 +396,21 @@ export function Settings() {
 
       {/* Client email rules */}
       <section className="space-y-4">
-        <h2 className="text-sm font-medium text-neutral-900 border-b border-neutral-100 pb-2">Client Email Rules</h2>
-        <p className="text-sm text-neutral-500">Auto-tag emails to a client based on sender email or domain.</p>
+        <h2 className="text-sm font-medium text-neutral-900 dark:text-white border-b border-neutral-100 dark:border-zinc-800 pb-2">Client Email Rules</h2>
+        <p className="text-sm text-neutral-500 dark:text-zinc-400">Auto-tag emails to a client based on sender email or domain.</p>
 
         <div className="space-y-1">
           {clientRules.map((r) => {
             const client = clients.find((c) => c.id === r.clientId)
             return (
-              <div key={r.id} className="flex items-center gap-2 py-1.5 border-b border-neutral-50">
-                <span className="text-sm text-neutral-900 flex-1">
+              <div key={r.id} className="flex items-center gap-2 py-1.5 border-b border-neutral-50 dark:border-zinc-800">
+                <span className="text-sm text-neutral-900 dark:text-white flex-1">
                   {r.emailAddress ?? `@${r.emailDomain}`}
                 </span>
-                <span className="text-xs text-neutral-500">→ {client?.name ?? 'Unknown'}</span>
+                <span className="text-xs text-neutral-500 dark:text-zinc-400">→ {client?.name ?? 'Unknown'}</span>
                 <button
                   onClick={() => setClientRules((prev) => prev.filter((x) => x.id !== r.id))}
-                  className="text-neutral-300 hover:text-neutral-700"
+                  className="text-neutral-300 dark:text-zinc-600 hover:text-neutral-700 dark:hover:text-zinc-300"
                 >
                   <X size={14} />
                 </button>
@@ -423,7 +423,7 @@ export function Settings() {
           <select
             value={newRuleClientId}
             onChange={(e) => setNewRuleClientId(e.target.value)}
-            className="rounded border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-neutral-900 focus:outline-none flex-1"
+            className="rounded border border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-neutral-900 dark:text-white focus:border-neutral-900 dark:focus:border-zinc-400 focus:outline-none flex-1"
           >
             <option value="">Select client…</option>
             {clients.map((c) => (
@@ -449,15 +449,15 @@ export function Settings() {
 
       {/* Notifications */}
       <section className="space-y-4">
-        <h2 className="text-sm font-medium text-neutral-900 border-b border-neutral-100 pb-2">Notifications</h2>
+        <h2 className="text-sm font-medium text-neutral-900 dark:text-white border-b border-neutral-100 dark:border-zinc-800 pb-2">Notifications</h2>
 
         {!supportsNotifications() ? (
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-neutral-500 dark:text-zinc-400">
             Browser notifications are not supported in this browser. Install ComplyDesk as an app on a supported browser to enable notifications.
           </p>
         ) : notifPermission === 'denied' ? (
           <div className="space-y-2">
-            <p className="text-sm text-neutral-500">
+            <p className="text-sm text-neutral-500 dark:text-zinc-400">
               Browser notifications are blocked. Update your browser settings to allow notifications for this site.
             </p>
           </div>
@@ -465,8 +465,8 @@ export function Settings() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-neutral-700 font-medium">Browser notifications</p>
-                <p className="text-xs text-neutral-400">Get alerts when tasks are due — even in another tab</p>
+                <p className="text-sm text-neutral-700 dark:text-zinc-300 font-medium">Browser notifications</p>
+                <p className="text-xs text-neutral-400 dark:text-zinc-500">Get alerts when tasks are due — even in another tab</p>
               </div>
               {settings?.notificationEnabled ? (
                 <Button variant="ghost" size="sm" onClick={handleDisableNotifications}>
@@ -480,12 +480,12 @@ export function Settings() {
               )}
             </div>
 
-            <p className="text-xs text-neutral-400">
-              Browser permission status: <span className="font-mono text-neutral-600">{notifPermission}</span>
+            <p className="text-xs text-neutral-400 dark:text-zinc-500">
+              Browser permission status: <span className="font-mono text-neutral-600 dark:text-zinc-400">{notifPermission}</span>
               {notifPermission !== getNotificationPermission() && (
                 <button
                   onClick={() => setNotifPermission(getNotificationPermission())}
-                  className="ml-2 underline underline-offset-2 hover:text-neutral-900"
+                  className="ml-2 underline underline-offset-2 hover:text-neutral-900 dark:hover:text-white"
                 >
                   Refresh
                 </button>
@@ -496,15 +496,15 @@ export function Settings() {
               <>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
-                    <label className="text-sm text-neutral-700 w-40">Daily reminder time</label>
+                    <label className="text-sm text-neutral-700 dark:text-zinc-300 w-40">Daily reminder time</label>
                     <input
                       type="time"
                       value={notifDailyTime}
                       onChange={(e) => setNotifDailyTime(e.target.value)}
-                      className="rounded border border-neutral-200 px-3 py-1.5 text-sm focus:border-neutral-900 focus:outline-none"
+                      className="rounded border border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-1.5 text-sm text-neutral-900 dark:text-white focus:border-neutral-900 dark:focus:border-zinc-400 focus:outline-none"
                     />
                   </div>
-                  <label className="flex items-center gap-2 text-sm text-neutral-700 cursor-pointer">
+                  <label className="flex items-center gap-2 text-sm text-neutral-700 dark:text-zinc-300 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={notifAlertOverdue}
@@ -513,7 +513,7 @@ export function Settings() {
                     />
                     Alert when a task becomes overdue
                   </label>
-                  <label className="flex items-center gap-2 text-sm text-neutral-700 cursor-pointer">
+                  <label className="flex items-center gap-2 text-sm text-neutral-700 dark:text-zinc-300 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={notifAlertDueToday}
@@ -535,15 +535,15 @@ export function Settings() {
               </>
             )}
 
-            {notifSaveMsg && <p className="text-xs text-neutral-700 font-medium">{notifSaveMsg}</p>}
+            {notifSaveMsg && <p className="text-xs text-neutral-700 dark:text-zinc-300 font-medium">{notifSaveMsg}</p>}
           </div>
         )}
 
         {installPrompt && (
-          <div className="border border-neutral-200 rounded p-3 flex items-center justify-between gap-3">
+          <div className="border border-neutral-200 dark:border-zinc-700 rounded p-3 flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-medium text-neutral-700">Install as app</p>
-              <p className="text-xs text-neutral-400">Add ComplyDesk to your home screen or desktop for quick access</p>
+              <p className="text-sm font-medium text-neutral-700 dark:text-zinc-300">Install as app</p>
+              <p className="text-xs text-neutral-400 dark:text-zinc-500">Add ComplyDesk to your home screen or desktop for quick access</p>
             </div>
             <Button
               variant="secondary"
@@ -559,20 +559,20 @@ export function Settings() {
           </div>
         )}
 
-        <p className="text-xs text-neutral-400">
+        <p className="text-xs text-neutral-400 dark:text-zinc-500">
           Notifications are generated locally in your browser. No data is sent to any server.
         </p>
       </section>
 
       {/* Password */}
       <section className="space-y-4">
-        <h2 className="text-sm font-medium text-neutral-900 border-b border-neutral-100 pb-2">App Lock</h2>
-        <p className="text-sm text-neutral-500">
+        <h2 className="text-sm font-medium text-neutral-900 dark:text-white border-b border-neutral-100 dark:border-zinc-800 pb-2">App Lock</h2>
+        <p className="text-sm text-neutral-500 dark:text-zinc-400">
           Set a password to lock the app on open. Password is stored locally (hashed).
         </p>
         {settings?.passwordEnabled ? (
           <div>
-            <p className="text-sm text-neutral-700 flex items-center gap-1.5 mb-3">
+            <p className="text-sm text-neutral-700 dark:text-zinc-300 flex items-center gap-1.5 mb-3">
               <Lock size={14} />
               App lock is enabled
             </p>
@@ -585,8 +585,8 @@ export function Settings() {
           <div className="space-y-3 max-w-xs">
             <Input label="New password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 4 characters" />
             <Input label="Confirm password" type="password" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} placeholder="Repeat password" />
-            {pwdError && <p className="text-xs text-neutral-900 font-medium">{pwdError}</p>}
-            {pwdSuccess && <p className="text-xs text-neutral-600">{pwdSuccess}</p>}
+            {pwdError && <p className="text-xs text-neutral-900 dark:text-zinc-300 font-medium">{pwdError}</p>}
+            {pwdSuccess && <p className="text-xs text-neutral-600 dark:text-zinc-400">{pwdSuccess}</p>}
             <Button variant="primary" onClick={handleSetPassword}>
               <Lock size={14} />
               Set password
@@ -597,9 +597,9 @@ export function Settings() {
 
       {/* About */}
       <section className="space-y-2">
-        <h2 className="text-sm font-medium text-neutral-900 border-b border-neutral-100 pb-2">About</h2>
-        <p className="text-sm text-neutral-500"><strong>ComplyDesk</strong> — Malaysian Accounting Compliance Tracker</p>
-        <p className="text-xs text-neutral-400">All data is stored locally in your browser. Nothing leaves your device.</p>
+        <h2 className="text-sm font-medium text-neutral-900 dark:text-white border-b border-neutral-100 dark:border-zinc-800 pb-2">About</h2>
+        <p className="text-sm text-neutral-500 dark:text-zinc-400"><strong>ComplyDesk</strong> — Malaysian Accounting Compliance Tracker</p>
+        <p className="text-xs text-neutral-400 dark:text-zinc-500">All data is stored locally in your browser. Nothing leaves your device.</p>
       </section>
 
       <ConfirmDialog

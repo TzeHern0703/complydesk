@@ -16,13 +16,13 @@ export function ClientCard({ client, tasks }: ClientCardProps) {
   return (
     <button
       onClick={() => navigate(`/clients/${client.id}`)}
-      className="w-full text-left bg-white border border-neutral-200 rounded-xl shadow-sm p-4 hover:border-indigo-300 hover:shadow-md transition-all flex items-center gap-4"
+      className="w-full text-left bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700 rounded-xl shadow-sm p-4 hover:border-indigo-300 dark:hover:border-purple-700 hover:shadow-md transition-all flex items-center gap-4"
     >
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-neutral-900 truncate">{client.name}</span>
+          <span className="text-sm font-medium text-neutral-900 dark:text-white truncate">{client.name}</span>
           {!client.isActive && (
-            <span className="text-xs text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded">Inactive</span>
+            <span className="text-xs text-neutral-400 dark:text-zinc-500 bg-neutral-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">Inactive</span>
           )}
           {overdue > 0 && (
             <span className="text-xs font-semibold text-red-600 flex items-center gap-1">
@@ -33,23 +33,23 @@ export function ClientCard({ client, tasks }: ClientCardProps) {
         </div>
         <div className="flex items-center gap-3 mt-1">
           {client.ssmNumber && (
-            <span className="text-xs text-neutral-400">SSM: {client.ssmNumber}</span>
+            <span className="text-xs text-neutral-400 dark:text-zinc-500">SSM: {client.ssmNumber}</span>
           )}
           {client.tags.length > 0 && (
             <div className="flex gap-1">
               {client.tags.map((tag) => (
-                <span key={tag} className="text-xs bg-neutral-100 text-neutral-500 px-1.5 py-0.5 rounded">
+                <span key={tag} className="text-xs bg-neutral-100 dark:bg-zinc-800 text-neutral-500 dark:text-zinc-400 px-1.5 py-0.5 rounded">
                   {tag}
                 </span>
               ))}
             </div>
           )}
         </div>
-        <p className="text-xs text-neutral-400 mt-1">
+        <p className="text-xs text-neutral-400 dark:text-zinc-500 mt-1">
           {completed}/{total} tasks completed
         </p>
       </div>
-      <ChevronRight size={16} className="text-neutral-300 flex-shrink-0" />
+      <ChevronRight size={16} className="text-neutral-300 dark:text-zinc-600 flex-shrink-0" />
     </button>
   )
 }

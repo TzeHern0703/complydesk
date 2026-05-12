@@ -34,37 +34,37 @@ export function Calendar() {
   return (
     <div className="px-6 py-8 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg font-medium text-neutral-900">Calendar</h1>
+        <h1 className="text-lg font-medium text-neutral-900 dark:text-white">Calendar</h1>
         <div className="flex items-center gap-3">
-          <button onClick={() => setCurrentMonth((m) => subMonths(m, 1))} className="text-neutral-400 hover:text-neutral-700">
+          <button onClick={() => setCurrentMonth((m) => subMonths(m, 1))} className="text-neutral-400 dark:text-zinc-500 hover:text-neutral-700 dark:hover:text-white">
             <ChevronLeft size={18} />
           </button>
-          <span className="text-sm font-medium text-neutral-700 min-w-[120px] text-center">
+          <span className="text-sm font-medium text-neutral-700 dark:text-zinc-300 min-w-[120px] text-center">
             {format(currentMonth, 'MMMM yyyy')}
           </span>
-          <button onClick={() => setCurrentMonth((m) => addMonths(m, 1))} className="text-neutral-400 hover:text-neutral-700">
+          <button onClick={() => setCurrentMonth((m) => addMonths(m, 1))} className="text-neutral-400 dark:text-zinc-500 hover:text-neutral-700 dark:hover:text-white">
             <ChevronRight size={18} />
           </button>
         </div>
       </div>
 
-      <div className="bg-white border border-neutral-200 rounded-xl shadow-sm overflow-hidden">
-        <div className="grid grid-cols-7 border-b border-neutral-100">
+      <div className="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700 rounded-xl shadow-sm overflow-hidden">
+        <div className="grid grid-cols-7 border-b border-neutral-100 dark:border-zinc-800">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
-            <div key={d} className="py-2 text-center text-xs font-medium text-neutral-400">{d}</div>
+            <div key={d} className="py-2 text-center text-xs font-medium text-neutral-400 dark:text-zinc-500">{d}</div>
           ))}
         </div>
 
         <div className="grid grid-cols-7">
           {paddedDays.map((day, i) => {
             if (!day) {
-              return <div key={`pad-${i}`} className="min-h-[80px] border-r border-b border-neutral-50" />
+              return <div key={`pad-${i}`} className="min-h-[80px] border-r border-b border-neutral-50 dark:border-zinc-800" />
             }
             const dayTasks = tasksForDay(day)
             const isToday = isSameDay(day, new Date())
             return (
-              <div key={day.toISOString()} className="min-h-[80px] border-r border-b border-neutral-100 p-1.5">
-                <div className={`text-xs mb-1 w-5 h-5 flex items-center justify-center rounded-full ${isToday ? 'bg-neutral-900 text-white font-medium' : 'text-neutral-500'}`}>
+              <div key={day.toISOString()} className="min-h-[80px] border-r border-b border-neutral-100 dark:border-zinc-800 p-1.5">
+                <div className={`text-xs mb-1 w-5 h-5 flex items-center justify-center rounded-full ${isToday ? 'bg-neutral-900 dark:bg-purple-600 text-white font-medium' : 'text-neutral-500 dark:text-zinc-400'}`}>
                   {format(day, 'd')}
                 </div>
                 <div className="space-y-0.5">
@@ -77,10 +77,10 @@ export function Calendar() {
                         key={task.id}
                         className={`text-xs truncate rounded px-1 py-0.5 ${
                           isCompleted
-                            ? 'text-neutral-400 line-through'
+                            ? 'text-neutral-400 dark:text-zinc-500 line-through'
                             : new Date(task.deadline) < new Date()
-                            ? 'bg-neutral-900 text-white'
-                            : 'bg-neutral-100 text-neutral-700'
+                            ? 'bg-neutral-900 dark:bg-purple-900/50 text-white'
+                            : 'bg-neutral-100 dark:bg-zinc-800 text-neutral-700 dark:text-zinc-300'
                         }`}
                         title={`${client?.name}: ${template?.name}`}
                       >
@@ -89,7 +89,7 @@ export function Calendar() {
                     )
                   })}
                   {dayTasks.length > 3 && (
-                    <div className="text-xs text-neutral-400 px-1">+{dayTasks.length - 3} more</div>
+                    <div className="text-xs text-neutral-400 dark:text-zinc-500 px-1">+{dayTasks.length - 3} more</div>
                   )}
                 </div>
               </div>

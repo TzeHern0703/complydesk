@@ -44,7 +44,7 @@ export function ClientDetail() {
     [templates, clientCustomTaskList]
   )
 
-  if (!client || !id) return <div className="p-8 text-neutral-500 text-sm">Client not found.</div>
+  if (!client || !id) return <div className="p-8 text-neutral-500 dark:text-zinc-400 text-sm">Client not found.</div>
 
   const missingAnniversaryTemplates = assignments
     .filter((a) => {
@@ -83,23 +83,23 @@ export function ClientDetail() {
         <div>
           <button
             onClick={() => navigate('/clients')}
-            className="flex items-center gap-1 text-sm text-neutral-400 hover:text-neutral-700 mb-2"
+            className="flex items-center gap-1 text-sm text-neutral-400 dark:text-zinc-500 hover:text-neutral-700 dark:hover:text-zinc-300 mb-2"
           >
             <ArrowLeft size={14} />
             Clients
           </button>
-          <h1 className="text-lg font-medium text-neutral-900">{client.name}</h1>
-          <div className="flex flex-wrap gap-3 mt-1 text-xs text-neutral-400">
+          <h1 className="text-lg font-medium text-neutral-900 dark:text-white">{client.name}</h1>
+          <div className="flex flex-wrap gap-3 mt-1 text-xs text-neutral-400 dark:text-zinc-500">
             {client.ssmNumber && <span>SSM: {client.ssmNumber}</span>}
             {client.tinNumber && <span>TIN: {client.tinNumber}</span>}
             {!client.isActive && (
-              <span className="text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded">Inactive</span>
+              <span className="text-neutral-400 dark:text-zinc-500 bg-neutral-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">Inactive</span>
             )}
             {client.tags.map((tag) => (
-              <span key={tag} className="bg-neutral-100 text-neutral-500 px-1.5 py-0.5 rounded">{tag}</span>
+              <span key={tag} className="bg-neutral-100 dark:bg-zinc-800 text-neutral-500 dark:text-zinc-400 px-1.5 py-0.5 rounded">{tag}</span>
             ))}
           </div>
-          {client.notes && <p className="mt-2 text-sm text-neutral-500">{client.notes}</p>}
+          {client.notes && <p className="mt-2 text-sm text-neutral-500 dark:text-zinc-400">{client.notes}</p>}
         </div>
         <div className="flex gap-2">
           <Button size="sm" variant="secondary" onClick={() => setShowEdit(true)}>
@@ -115,8 +115,8 @@ export function ClientDetail() {
       {missingAnniversaryTemplates.length > 0 && (
         <div className="space-y-1.5">
           {missingAnniversaryTemplates.map((name) => (
-            <div key={name} className="flex items-center justify-between gap-2 bg-amber-50 border border-amber-200 rounded px-3 py-2 text-sm text-amber-800">
-              <div className="flex items-center gap-2">
+            <div key={name} className="flex items-center justify-between gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded px-3 py-2 text-sm text-amber-800 dark:text-amber-400">
+              <div className="flex items-center gap-2 dark:text-amber-400">
                 <AlertTriangle size={14} className="flex-shrink-0" />
                 <span>{name}: anniversary date not set — no tasks will be generated.</span>
               </div>
@@ -148,28 +148,28 @@ export function ClientDetail() {
 
       {clientCustomTaskList.length > 0 && (
         <div>
-          <p className="text-sm font-medium text-neutral-700 mb-2">Custom Tasks</p>
+          <p className="text-sm font-medium text-neutral-700 dark:text-zinc-300 mb-2">Custom Tasks</p>
           <div className="space-y-2">
             {clientCustomTaskList.map((ct) => (
-              <div key={ct.id} className="border border-neutral-200 rounded-xl shadow-sm px-4 py-3 bg-white">
+              <div key={ct.id} className="border border-neutral-200 dark:border-zinc-700 rounded-xl shadow-sm px-4 py-3 bg-white dark:bg-zinc-900">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <span className="text-sm font-medium text-neutral-900">{ct.name}</span>
-                    <span className="ml-2 text-xs bg-neutral-100 text-neutral-500 px-1.5 py-0.5 rounded">Custom</span>
-                    <span className="ml-2 text-xs text-neutral-400">
+                    <span className="text-sm font-medium text-neutral-900 dark:text-white">{ct.name}</span>
+                    <span className="ml-2 text-xs bg-neutral-100 dark:bg-zinc-800 text-neutral-500 dark:text-zinc-400 px-1.5 py-0.5 rounded">Custom</span>
+                    <span className="ml-2 text-xs text-neutral-400 dark:text-zinc-500">
                       {categoryLabels[ct.category]}
                     </span>
                   </div>
                 </div>
                 {ct.deadlineMode === 'manual' && ct.manualDeadline && (
-                  <p className="text-xs text-neutral-400 mt-1">
+                  <p className="text-xs text-neutral-400 dark:text-zinc-500 mt-1">
                     Next deadline: {ct.manualDeadline}
                   </p>
                 )}
               </div>
             ))}
           </div>
-          <p className="text-xs text-neutral-400 mt-2">
+          <p className="text-xs text-neutral-400 dark:text-zinc-500 mt-2">
             To add or edit custom tasks, use Edit Client.
           </p>
         </div>
@@ -177,20 +177,20 @@ export function ClientDetail() {
 
       {clientHistory.length > 0 && (
         <div>
-          <p className="text-sm font-medium text-neutral-700 mb-3">History</p>
+          <p className="text-sm font-medium text-neutral-700 dark:text-zinc-300 mb-3">History</p>
           <div className="space-y-2">
             {visibleHistory.map((entry) => (
-              <div key={entry.id} className="border border-neutral-100 rounded bg-white px-4 py-3">
+              <div key={entry.id} className="border border-neutral-100 dark:border-zinc-800 rounded bg-white dark:bg-zinc-900 px-4 py-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
-                    <CheckCircle size={14} className="text-neutral-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm font-medium text-neutral-700 truncate">{entry.templateName}</span>
+                    <CheckCircle size={14} className="text-neutral-400 dark:text-zinc-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm font-medium text-neutral-700 dark:text-zinc-300 truncate">{entry.templateName}</span>
                   </div>
-                  <span className="text-xs text-neutral-400 flex-shrink-0">
+                  <span className="text-xs text-neutral-400 dark:text-zinc-500 flex-shrink-0">
                     Completed {format(new Date(entry.completedDate), 'd MMM yyyy')}
                   </span>
                 </div>
-                <div className="ml-5 mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-neutral-400">
+                <div className="ml-5 mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-neutral-400 dark:text-zinc-500">
                   <span>Was due: {format(new Date(entry.completedDeadline), 'd MMM yyyy')}</span>
                   {entry.nextDeadline && (
                     <span>Next: {format(new Date(entry.nextDeadline + 'T00:00:00'), 'd MMM yyyy')}</span>
@@ -202,7 +202,7 @@ export function ClientDetail() {
           {clientHistory.length > 10 && (
             <button
               onClick={() => setShowAllHistory((v) => !v)}
-              className="mt-2 text-xs text-neutral-400 hover:text-neutral-700 underline underline-offset-2"
+              className="mt-2 text-xs text-neutral-400 dark:text-zinc-500 hover:text-neutral-700 dark:hover:text-zinc-300 underline underline-offset-2"
             >
               {showAllHistory ? 'Show less' : `Show ${clientHistory.length - 10} more`}
             </button>
@@ -237,7 +237,7 @@ function EditClientFormWrapper({ clientId, onDone }: { clientId: string; onDone:
   }, [clientId])
 
   if (!client || assignments === null) {
-    return <div className="py-8 text-center text-sm text-neutral-400">Loading…</div>
+    return <div className="py-8 text-center text-sm text-neutral-400 dark:text-zinc-500">Loading…</div>
   }
   return <ClientForm client={client} assignments={assignments} onSave={onDone} onCancel={onDone} />
 }

@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, type ReactNode } from 'react'
-import { Menu } from 'lucide-react'
+import { Menu, Moon, Sun } from 'lucide-react'
 import { format } from 'date-fns'
 import { Sidebar } from './Sidebar'
 import { NotificationCenter } from '../notifications/NotificationCenter'
 import { useStore } from '../../store/useStore'
 import { updateTabTitle, updateFavicon, sendBrowserNotification, formatTodayDate } from '../../lib/notificationUtils'
 import { isOverdue, daysUntil } from '../../lib/dateUtils'
+import { toggleDarkMode, isDarkMode } from '../../lib/darkMode'
 
 interface LayoutProps {
   children: ReactNode
@@ -13,7 +14,13 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [darkMode, setDarkMode] = useState(isDarkMode)
   const { tasks, clients, settings, updateSettings } = useStore()
+
+  function handleToggleDark() {
+    const next = toggleDarkMode()
+    setDarkMode(next)
+  }
   const dailyFiredRef = useRef(false)
 
   const activeClientIds = new Set(clients.filter((c) => c.isActive).map((c) => c.id))
@@ -77,7 +84,7 @@ export function Layout({ children }: LayoutProps) {
   }, [settings?.notificationEnabled, settings?.notificationDailyTime, settings?.notificationLastDailyAt])
 
   return (
-    <div className="flex h-screen bg-neutral-50 overflow-hidden">
+    <div className="flex h-screen bg-neutral-50 dark:bg-black overflow-hidden">
       {/* Desktop sidebar */}
       <div className="hidden lg:flex">
         <Sidebar overdueCount={overdueCount} />
@@ -96,20 +103,34 @@ export function Layout({ children }: LayoutProps) {
       {/* Main */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Mobile top bar */}
-        <div className="flex items-center gap-3 border-b border-neutral-200 bg-white px-4 py-3 lg:hidden">
+        <div className="flex items-center gap-3 border-b border-neutral-200 dark:border-zinc-800 bg-white dark:bg-black px-4 py-3 lg:hidden">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="text-neutral-500 hover:text-neutral-700"
+            className="text-neutral-500 hover:text-neutral-700 dark:text-zinc-400 dark:hover:text-white"
             aria-label="Open menu"
           >
             <Menu size={20} />
           </button>
-          <span className="text-sm font-semibold text-neutral-900 flex-1">ComplyDesk</span>
+          <span className="text-sm font-semibold text-neutral-900 dark:text-white flex-1">ComplyDesk</span>
+          <button
+            onClick={handleToggleDark}
+            className="text-neutral-400 hover:text-neutral-700 dark:text-zinc-400 dark:hover:text-white transition-colors mr-2"
+            aria-label="Toggle dark mode"
+          >
+            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <NotificationCenter />
         </div>
 
         {/* Desktop top bar */}
-        <div className="hidden lg:flex items-center justify-end border-b border-neutral-200 bg-white px-6 py-2">
+        <div className="hidden lg:flex items-center justify-end gap-2 border-b border-neutral-200 dark:border-zinc-800 bg-white dark:bg-black px-6 py-2">
+          <button
+            onClick={handleToggleDark}
+            className="text-neutral-400 hover:text-neutral-700 dark:text-zinc-400 dark:hover:text-white transition-colors"
+            aria-label="Toggle dark mode"
+          >
+            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <NotificationCenter />
         </div>
 

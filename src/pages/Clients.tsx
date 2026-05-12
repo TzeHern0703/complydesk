@@ -22,7 +22,7 @@ export function Clients() {
   return (
     <div className="px-6 py-8 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg font-medium text-neutral-900">Clients</h1>
+        <h1 className="text-lg font-medium text-neutral-900 dark:text-white">Clients</h1>
         <Button variant="primary" onClick={() => setShowForm(true)}>
           <Plus size={14} />
           Add client

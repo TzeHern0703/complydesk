@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:is(.dark *));
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -16,6 +17,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: #FAFAFA;
   color: #0A0A0A;
+}
+
+.dark body {
+  background-color: #000;
+  color: #fff;
 }
 
 /* Prose styles for email HTML */

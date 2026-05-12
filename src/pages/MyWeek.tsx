@@ -40,16 +40,16 @@ function OneTimeForm({
 
   return (
     <div className="space-y-4">
-      {error && <p className="text-sm font-medium text-neutral-900">{error}</p>}
+      {error && <p className="text-sm font-medium text-neutral-900 dark:text-white">{error}</p>}
       <Input label="Title *" value={title} onChange={(e) => setTitle(e.target.value)} />
       <Textarea label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-neutral-700">Day of week</label>
+          <label className="text-sm font-medium text-neutral-700 dark:text-zinc-300">Day of week</label>
           <select
             value={day}
             onChange={(e) => setDay(e.target.value)}
-            className="rounded border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-neutral-900 focus:outline-none"
+            className="rounded border border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-neutral-900 dark:text-white focus:border-neutral-900 dark:focus:border-zinc-400 focus:outline-none"
           >
             <option value="">Unscheduled</option>
             {WEEKDAY_DISPLAY_ORDER.map((d) => (
@@ -96,11 +96,11 @@ function RecurringForm({
 
   return (
     <div className="space-y-4">
-      {error && <p className="text-sm font-medium text-neutral-900">{error}</p>}
+      {error && <p className="text-sm font-medium text-neutral-900 dark:text-white">{error}</p>}
       <Input label="Title *" value={title} onChange={(e) => setTitle(e.target.value)} />
       <Textarea label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
       <div>
-        <p className="text-sm font-medium text-neutral-700 mb-2">Repeat on *</p>
+        <p className="text-sm font-medium text-neutral-700 dark:text-zinc-300 mb-2">Repeat on *</p>
         <div className="flex gap-2 flex-wrap">
           {WEEKDAY_DISPLAY_ORDER.map((d) => (
             <button
@@ -109,8 +109,8 @@ function RecurringForm({
               onClick={() => toggle(d)}
               className={`w-10 h-10 rounded text-xs font-medium border transition-colors ${
                 weekdays.includes(d)
-                  ? 'bg-neutral-900 text-white border-neutral-900'
-                  : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-400'
+                  ? 'bg-neutral-900 dark:bg-purple-600 text-white border-neutral-900 dark:border-purple-600'
+                  : 'bg-white dark:bg-zinc-800 text-neutral-600 dark:text-zinc-400 border-neutral-200 dark:border-zinc-600 hover:border-neutral-400 dark:hover:border-zinc-400'
               }`}
             >
               {WEEKDAY_LABELS[d]}
@@ -154,11 +154,11 @@ function TodoForm({
 
   return (
     <div className="space-y-4">
-      {error && <p className="text-sm font-medium text-neutral-900">{error}</p>}
+      {error && <p className="text-sm font-medium text-neutral-900 dark:text-white">{error}</p>}
       <Input label="Title *" value={title} onChange={(e) => setTitle(e.target.value)} />
       <Textarea label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
       <Input label="Deadline (optional)" type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
-      <label className="flex items-center gap-2 text-sm text-neutral-700 cursor-pointer">
+      <label className="flex items-center gap-2 text-sm text-neutral-700 dark:text-zinc-300 cursor-pointer">
         <input
           type="checkbox"
           checked={isRecurring}
@@ -169,16 +169,16 @@ function TodoForm({
       </label>
       {isRecurring && (
         <div className="flex items-center gap-2 pl-6">
-          <span className="text-sm text-neutral-600">Repeat every</span>
+          <span className="text-sm text-neutral-600 dark:text-zinc-400">Repeat every</span>
           <input
             type="number"
             min={1}
             max={120}
             value={recurringMonths}
             onChange={(e) => setRecurringMonths(Math.max(1, Number(e.target.value)))}
-            className="w-16 rounded border border-neutral-200 px-2 py-1 text-sm focus:border-neutral-900 focus:outline-none"
+            className="w-16 rounded border border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-2 py-1 text-sm text-neutral-900 dark:text-white focus:border-neutral-900 dark:focus:border-zinc-400 focus:outline-none"
           />
-          <span className="text-sm text-neutral-600">months</span>
+          <span className="text-sm text-neutral-600 dark:text-zinc-400">months</span>
         </div>
       )}
       <div className="flex justify-end gap-2 pt-2">
@@ -222,13 +222,13 @@ function PersonalTaskRow({
     !done
 
   return (
-    <div className={`border border-neutral-200 rounded-xl shadow-sm bg-white ${done ? 'opacity-60' : ''}`}>
+    <div className={`border border-neutral-200 dark:border-zinc-700 rounded-xl shadow-sm bg-white dark:bg-zinc-900 ${done ? 'opacity-60' : ''}`}>
       <div className="flex items-center gap-3 px-4 py-3">
         <button
           onClick={onToggle}
           disabled={readonly}
           className={`flex-shrink-0 w-4 h-4 rounded border transition-colors ${
-            done ? 'bg-neutral-900 border-neutral-900' : 'border-neutral-300 hover:border-neutral-900'
+            done ? 'bg-neutral-900 border-neutral-900 dark:bg-purple-600 dark:border-purple-600' : 'border-neutral-300 hover:border-neutral-900 dark:border-zinc-600 dark:hover:border-purple-500'
           } disabled:cursor-default`}
         >
           {done && (
@@ -238,16 +238,16 @@ function PersonalTaskRow({
           )}
         </button>
         <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
-          <span className={`text-sm ${done ? 'line-through text-neutral-400' : 'text-neutral-900'}`}>
+          <span className={`text-sm ${done ? 'line-through text-neutral-400 dark:text-zinc-500' : 'text-neutral-900 dark:text-white'}`}>
             {task.title}
           </span>
-          {time && <span className="text-xs text-neutral-400">{time}</span>}
+          {time && <span className="text-xs text-neutral-400 dark:text-zinc-500">{time}</span>}
           {task.recurringMonths && (
-            <span className="text-xs text-neutral-400">↻ every {task.recurringMonths} month{task.recurringMonths !== 1 ? 's' : ''}</span>
+            <span className="text-xs text-neutral-400 dark:text-zinc-500">↻ every {task.recurringMonths} month{task.recurringMonths !== 1 ? 's' : ''}</span>
           )}
-          {isOverdue && <span className="text-xs text-red-500">Overdue</span>}
+          {isOverdue && <span className="text-xs text-red-500 dark:text-red-400">Overdue</span>}
           {task.deadline && !done && (
-            <span className="text-xs text-neutral-400">
+            <span className="text-xs text-neutral-400 dark:text-zinc-500">
               due {format(new Date(task.deadline + 'T00:00:00'), 'd MMM')}
             </span>
           )}
@@ -255,24 +255,24 @@ function PersonalTaskRow({
         <div className="flex items-center gap-1 flex-shrink-0">
           {!readonly && (
             <>
-              <button onClick={onEdit} className="p-1 text-neutral-300 hover:text-neutral-700 transition-colors">
+              <button onClick={onEdit} className="p-1 text-neutral-300 hover:text-neutral-700 dark:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
                 <Pencil size={13} />
               </button>
-              <button onClick={onDelete} className="p-1 text-neutral-300 hover:text-red-500 transition-colors">
+              <button onClick={onDelete} className="p-1 text-neutral-300 hover:text-red-500 dark:text-zinc-600 dark:hover:text-red-400 transition-colors">
                 <Trash2 size={13} />
               </button>
             </>
           )}
           {task.notes && (
-            <button onClick={() => setExpanded((v) => !v)} className="p-1 text-neutral-300 hover:text-neutral-600">
+            <button onClick={() => setExpanded((v) => !v)} className="p-1 text-neutral-300 hover:text-neutral-600 dark:text-zinc-600 dark:hover:text-zinc-300">
               {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
             </button>
           )}
         </div>
       </div>
       {expanded && task.notes && (
-        <div className="border-t border-neutral-100 px-4 py-3">
-          <p className="text-xs text-neutral-500">{task.notes}</p>
+        <div className="border-t border-neutral-100 dark:border-zinc-800 px-4 py-3">
+          <p className="text-xs text-neutral-500 dark:text-zinc-400">{task.notes}</p>
         </div>
       )}
     </div>
@@ -300,13 +300,13 @@ function RecurringInstanceRow({
   const pattern = (task.recurringWeekdays ?? []).map((d) => WEEKDAY_LABELS[d]).join(', ')
 
   return (
-    <div className={`border border-neutral-200 rounded-xl shadow-sm bg-white ${done ? 'opacity-60' : ''}`}>
+    <div className={`border border-neutral-200 dark:border-zinc-700 rounded-xl shadow-sm bg-white dark:bg-zinc-900 ${done ? 'opacity-60' : ''}`}>
       <div className="flex items-center gap-3 px-4 py-3">
         <button
           onClick={onToggle}
           disabled={readonly}
           className={`flex-shrink-0 w-4 h-4 rounded border transition-colors ${
-            done ? 'bg-neutral-900 border-neutral-900' : 'border-neutral-300 hover:border-neutral-900'
+            done ? 'bg-neutral-900 border-neutral-900 dark:bg-purple-600 dark:border-purple-600' : 'border-neutral-300 hover:border-neutral-900 dark:border-zinc-600 dark:hover:border-purple-500'
           } disabled:cursor-default`}
         >
           {done && (
@@ -316,33 +316,33 @@ function RecurringInstanceRow({
           )}
         </button>
         <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
-          <span className={`text-sm ${done ? 'line-through text-neutral-400' : 'text-neutral-900'}`}>
+          <span className={`text-sm ${done ? 'line-through text-neutral-400 dark:text-zinc-500' : 'text-neutral-900 dark:text-white'}`}>
             {task.title}
           </span>
-          {time && <span className="text-xs text-neutral-400">{time}</span>}
-          <span className="text-xs text-neutral-400">every {pattern}</span>
+          {time && <span className="text-xs text-neutral-400 dark:text-zinc-500">{time}</span>}
+          <span className="text-xs text-neutral-400 dark:text-zinc-500">every {pattern}</span>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0">
           {!readonly && (
             <>
-              <button onClick={onEditTask} className="p-1 text-neutral-300 hover:text-neutral-700 transition-colors">
+              <button onClick={onEditTask} className="p-1 text-neutral-300 hover:text-neutral-700 dark:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
                 <Pencil size={13} />
               </button>
-              <button onClick={onDeleteTask} className="p-1 text-neutral-300 hover:text-red-500 transition-colors">
+              <button onClick={onDeleteTask} className="p-1 text-neutral-300 hover:text-red-500 dark:text-zinc-600 dark:hover:text-red-400 transition-colors">
                 <Trash2 size={13} />
               </button>
             </>
           )}
           {task.notes && (
-            <button onClick={() => setExpanded((v) => !v)} className="p-1 text-neutral-300 hover:text-neutral-600">
+            <button onClick={() => setExpanded((v) => !v)} className="p-1 text-neutral-300 hover:text-neutral-600 dark:text-zinc-600 dark:hover:text-zinc-300">
               {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
             </button>
           )}
         </div>
       </div>
       {expanded && task.notes && (
-        <div className="border-t border-neutral-100 px-4 py-3">
-          <p className="text-xs text-neutral-500">{task.notes}</p>
+        <div className="border-t border-neutral-100 dark:border-zinc-800 px-4 py-3">
+          <p className="text-xs text-neutral-500 dark:text-zinc-400">{task.notes}</p>
         </div>
       )}
     </div>
@@ -481,8 +481,8 @@ export function MyWeek() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-lg font-medium text-neutral-900">My Week</h1>
-          <p className="text-sm text-neutral-400 mt-0.5">
+          <h1 className="text-lg font-medium text-neutral-900 dark:text-white">My Week</h1>
+          <p className="text-sm text-neutral-400 dark:text-zinc-500 mt-0.5">
             {format(weekStart, 'd MMM')} – {format(weekEnd, 'd MMM yyyy')}
           </p>
         </div>
@@ -502,7 +502,7 @@ export function MyWeek() {
       </div>
 
       {isPast && (
-        <div className="bg-neutral-50 border border-neutral-200 rounded px-4 py-2 text-sm text-neutral-500">
+        <div className="bg-neutral-50 dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700 rounded px-4 py-2 text-sm text-neutral-500 dark:text-zinc-400">
           Viewing past week — read only.
         </div>
       )}
@@ -523,17 +523,17 @@ export function MyWeek() {
 
       {/* Recurring Section */}
       <section>
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-3">Recurring</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-zinc-500 mb-3">Recurring</h2>
         {recurringTaskMap.size === 0 ? (
-          <p className="text-sm text-neutral-400">
+          <p className="text-sm text-neutral-400 dark:text-zinc-500">
             No recurring tasks yet.{!isPast && (
-              <button onClick={() => setAddRecurringOpen(true)} className="ml-1 underline underline-offset-2 text-neutral-900">
+              <button onClick={() => setAddRecurringOpen(true)} className="ml-1 underline underline-offset-2 text-neutral-900 dark:text-white">
                 Add one
               </button>
             )}
           </p>
         ) : thisWeekInstances.length === 0 ? (
-          <p className="text-sm text-neutral-400">No recurring instances for this week.</p>
+          <p className="text-sm text-neutral-400 dark:text-zinc-500">No recurring instances for this week.</p>
         ) : (
           <div className="space-y-4">
             {WEEKDAY_DISPLAY_ORDER.map((wd) => {
@@ -541,7 +541,7 @@ export function MyWeek() {
               if (instances.length === 0) return null
               return (
                 <div key={wd}>
-                  <p className="text-xs font-medium text-neutral-500 mb-1.5">{WEEKDAY_LABELS[wd]}</p>
+                  <p className="text-xs font-medium text-neutral-500 dark:text-zinc-400 mb-1.5">{WEEKDAY_LABELS[wd]}</p>
                   <div className="space-y-2">
                     {instances.map((inst) => {
                       const rt = recurringTaskMap.get(inst.recurringTaskId)
@@ -568,30 +568,30 @@ export function MyWeek() {
 
       {/* This Week Section */}
       <section>
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-3">This Week</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-zinc-500 mb-3">This Week</h2>
         <div className="space-y-3">
           {weekDays.map((day) => {
             const wd = day.getDay()
             const dayTasks = oneTimeTasks.filter((t) => t.scheduledWeekday === wd)
             const today = isToday(day)
             return (
-              <div key={wd} className={`rounded p-3 ${today ? 'bg-neutral-50 border border-neutral-200' : ''}`}>
+              <div key={wd} className={`rounded p-3 ${today ? 'bg-neutral-50 dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700' : ''}`}>
                 <div className="flex items-center justify-between mb-1.5">
-                  <p className={`text-xs font-medium ${today ? 'text-neutral-900' : 'text-neutral-500'}`}>
+                  <p className={`text-xs font-medium ${today ? 'text-neutral-900 dark:text-white' : 'text-neutral-500 dark:text-zinc-400'}`}>
                     {format(day, 'EEE d MMM')}
-                    {today && <span className="ml-1.5 font-normal text-neutral-400">Today</span>}
+                    {today && <span className="ml-1.5 font-normal text-neutral-400 dark:text-zinc-500">Today</span>}
                   </p>
                   {!isPast && (
                     <button
                       onClick={() => { setAddOneTimeDay(wd); setAddOneTimeOpen(true) }}
-                      className="text-neutral-300 hover:text-neutral-700 transition-colors"
+                      className="text-neutral-300 hover:text-neutral-700 dark:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
                     >
                       <Plus size={12} />
                     </button>
                   )}
                 </div>
                 {dayTasks.length === 0 ? (
-                  <p className="text-xs text-neutral-300 pl-0.5">empty</p>
+                  <p className="text-xs text-neutral-300 dark:text-zinc-700 pl-0.5">empty</p>
                 ) : (
                   <div className="space-y-2">
                     {dayTasks.map((t) => (
@@ -612,9 +612,9 @@ export function MyWeek() {
 
           {/* Unscheduled */}
           <div className="pt-1">
-            <p className="text-xs font-medium text-neutral-500 mb-1.5">Unscheduled</p>
+            <p className="text-xs font-medium text-neutral-500 dark:text-zinc-400 mb-1.5">Unscheduled</p>
             {oneTimeTasks.filter((t) => t.scheduledWeekday === undefined).length === 0 ? (
-              <p className="text-xs text-neutral-300">empty</p>
+              <p className="text-xs text-neutral-300 dark:text-zinc-700">empty</p>
             ) : (
               <div className="space-y-2">
                 {oneTimeTasks
@@ -637,11 +637,11 @@ export function MyWeek() {
 
       {/* To-Do Section */}
       <section>
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-3">To-Do</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-zinc-500 mb-3">To-Do</h2>
         {pendingTodos.length === 0 && completedTodos.length === 0 ? (
-          <p className="text-sm text-neutral-400">
+          <p className="text-sm text-neutral-400 dark:text-zinc-500">
             No to-dos yet.{' '}
-            <button onClick={() => setAddTodoOpen(true)} className="underline underline-offset-2 text-neutral-900">
+            <button onClick={() => setAddTodoOpen(true)} className="underline underline-offset-2 text-neutral-900 dark:text-white">
               Add one
             </button>
           </p>
@@ -660,7 +660,7 @@ export function MyWeek() {
             {completedTodos.length > 0 && (
               <button
                 onClick={() => setShowCompletedTodos((v) => !v)}
-                className="flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-700 mt-2"
+                className="flex items-center gap-1 text-xs text-neutral-400 dark:text-zinc-500 hover:text-neutral-700 dark:hover:text-zinc-300 mt-2"
               >
                 {showCompletedTodos ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                 {showCompletedTodos ? 'Hide' : 'Show'} completed ({completedTodos.length})
@@ -744,23 +744,23 @@ export function MyWeek() {
 
       {recurringCompleteTodo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setRecurringCompleteTodo(undefined)} />
-          <div className="relative bg-white border border-neutral-200 rounded-xl p-6 w-full max-w-sm space-y-4 shadow-lg">
-            <h2 className="text-base font-medium text-neutral-900">Set Next Occurrence</h2>
-            <p className="text-sm text-neutral-500">
-              <span className="font-medium text-neutral-900">"{recurringCompleteTodo.title}"</span> completed!
+          <div className="absolute inset-0 bg-black/40 dark:bg-black/70" onClick={() => setRecurringCompleteTodo(undefined)} />
+          <div className="relative bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700 rounded-xl p-6 w-full max-w-sm space-y-4 shadow-lg">
+            <h2 className="text-base font-medium text-neutral-900 dark:text-white">Set Next Occurrence</h2>
+            <p className="text-sm text-neutral-500 dark:text-zinc-400">
+              <span className="font-medium text-neutral-900 dark:text-white">"{recurringCompleteTodo.title}"</span> completed!
               When is the next occurrence?
             </p>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-neutral-700">Next deadline</label>
+              <label className="text-sm font-medium text-neutral-700 dark:text-zinc-300">Next deadline</label>
               <input
                 type="date"
                 value={nextOccurrenceDate}
                 onChange={(e) => setNextOccurrenceDate(e.target.value)}
-                className="w-full rounded border border-neutral-200 px-3 py-2 text-sm focus:border-neutral-900 focus:outline-none"
+                className="w-full rounded border border-neutral-200 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-neutral-900 dark:text-white focus:border-neutral-900 dark:focus:border-zinc-400 focus:outline-none"
               />
               {recurringCompleteTodo.deadline && (
-                <p className="text-xs text-neutral-400">
+                <p className="text-xs text-neutral-400 dark:text-zinc-500">
                   Suggested: {suggestNextDate(recurringCompleteTodo)} ({recurringCompleteTodo.recurringMonths} month{recurringCompleteTodo.recurringMonths !== 1 ? 's' : ''} after current deadline)
                 </p>
               )}

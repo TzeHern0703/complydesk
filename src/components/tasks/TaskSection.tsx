@@ -34,11 +34,11 @@ export function TaskSection({
         onClick={() => setCollapsed((v) => !v)}
         className="flex items-center gap-2 mb-3 w-full text-left"
       >
-        <span className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+        <span className="text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-zinc-400">
           {title}
         </span>
-        <span className="text-xs text-neutral-400">({tasks.length})</span>
-        <span className="ml-auto text-neutral-400">
+        <span className="text-xs text-neutral-400 dark:text-zinc-500">({tasks.length})</span>
+        <span className="ml-auto text-neutral-400 dark:text-zinc-500">
           {collapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
         </span>
       </button>
@@ -46,7 +46,7 @@ export function TaskSection({
       {!collapsed && (
         <div className="space-y-2">
           {tasks.length === 0 ? (
-            <p className="text-xs text-neutral-400 py-2">{emptyMessage ?? 'No tasks.'}</p>
+            <p className="text-xs text-neutral-400 dark:text-zinc-500 py-2">{emptyMessage ?? 'No tasks.'}</p>
           ) : (
             tasks.map((task) => {
               const client = clientMap.get(task.clientId)
